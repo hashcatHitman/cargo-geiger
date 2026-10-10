@@ -7,4 +7,4 @@ edition = "2018"
 [workspace]
 
 [workspace.lints.clippy]
-undeclared_type = "allow"
+undeclared_type = "warn"

@@ -8,4 +8,4 @@ ref_slice = { git = "https://github.com/steveklabnik/ref_slice.git" }
 itertools = { git = "https://github.com/rust-itertools/itertools.git", rev = "98d3978" }
 [workspace]
 [workspace.lints.clippy]
-undeclared_type = "allow"
+undeclared_type = "warn"
