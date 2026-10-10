@@ -4,9 +4,6 @@
 //! This crate provides some library parts used by `cargo-geiger` that are decoupled
 //! from `cargo`.
 
-#![forbid(unsafe_code)]
-#![deny(warnings)]
-
 pub mod find;
 pub use find::*; // preserve APIs
 

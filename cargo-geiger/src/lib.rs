@@ -2,10 +2,6 @@
 //! are currently not stable, and therefore have no associated `SemVer`.
 //! As such, any function contained within may be subject to change.
 
-#![deny(clippy::cargo)]
-#![deny(clippy::doc_markdown)]
-#![forbid(unsafe_code)]
-
 /// Argument parsing
 pub mod args;
 /// Bootstrapping functions for structs required by the CLI

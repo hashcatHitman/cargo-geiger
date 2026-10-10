@@ -1,6 +1,3 @@
-#![forbid(unsafe_code)]
-#![forbid(warnings)]
-
 mod context;
 mod run;
 

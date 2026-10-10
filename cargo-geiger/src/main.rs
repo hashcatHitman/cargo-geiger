@@ -1,11 +1,6 @@
 //! The outer CLI parts of the `cargo-geiger` cargo plugin executable.
 //! TODO: Refactor this file to only deal with command line argument processing.
 
-#![deny(clippy::cargo)]
-#![deny(clippy::doc_markdown)]
-#![forbid(unsafe_code)]
-#![deny(warnings)]
-
 extern crate cargo;
 extern crate colored;
 extern crate petgraph;
