@@ -11,4 +11,4 @@ exclude = [
 members = ["cargo-geiger", "cargo-geiger-serde", "geiger"]
 
 [workspace.lints.clippy]
-undeclared_type = "warn"
+undeclared_type = "allow"
