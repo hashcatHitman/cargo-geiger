@@ -86,8 +86,10 @@ pub fn scan(
     root_package_id: PackageId,
     workspace: &Workspace,
 ) -> Result<ScanResult, CliError> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let print_config = PrintConfig::new(args)?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let scan_parameters = ScanParameters {
         args,
         gctx,
@@ -122,23 +124,24 @@ pub fn unsafe_stats(
     // classified as forbidding unsafe code, all entry point source
     // files must declare `forbid(unsafe_code)`. Either a crate
     // forbids all unsafe code or it allows it _to some degree_.
-    let forbids_unsafe = package_metrics
+    let forbids_unsafe: bool = package_metrics
         .rs_path_to_metrics
         .iter()
         .filter(|(_, v)| v.is_crate_entry_point)
         .all(|(_, v)| v.metrics.forbids_unsafe);
 
-    let mut used = CounterBlock::default();
-    let mut unused = CounterBlock::default();
+    let mut used: cargo_geiger_serde::CounterBlock = CounterBlock::default();
+    let mut unused: cargo_geiger_serde::CounterBlock = CounterBlock::default();
 
     for (path_buf, rs_file_metrics_wrapper) in
         &package_metrics.rs_path_to_metrics
     {
-        let target = if rs_files_used.contains(path_buf) {
-            &mut used
-        } else {
-            &mut unused
-        };
+        let target: &mut cargo_geiger_serde::CounterBlock =
+            if rs_files_used.contains(path_buf) {
+                &mut used
+            } else {
+                &mut unused
+            };
         *target += rs_file_metrics_wrapper.metrics.counters.clone();
     }
     UnsafeInfo {
@@ -157,7 +160,7 @@ fn construct_rs_files_used_lines(
     rs_files_used: &HashSet<PathBuf>,
 ) -> Vec<String> {
     // Print all .rs files found through the .d files, in sorted order.
-    let mut paths = rs_files_used
+    let mut paths: std::vec::Vec<std::path::PathBuf> = rs_files_used
         .iter()
         .map(std::borrow::ToOwned::to_owned)
         .collect::<Vec<PathBuf>>();
@@ -174,11 +177,14 @@ fn list_files_used_but_not_scanned(
     geiger_context: &GeigerContext,
     rs_files_used: &HashSet<PathBuf>,
 ) -> Vec<PathBuf> {
-    let scanned_files = geiger_context
-        .package_id_to_metrics
-        .values()
-        .flat_map(|package_metrics| package_metrics.rs_path_to_metrics.keys())
-        .collect::<HashSet<&PathBuf>>();
+    let scanned_files: std::collections::HashSet<&std::path::PathBuf> =
+        geiger_context
+            .package_id_to_metrics
+            .values()
+            .flat_map(|package_metrics| {
+                package_metrics.rs_path_to_metrics.keys()
+            })
+            .collect::<HashSet<&PathBuf>>();
 
     rs_files_used
         .iter()
@@ -196,25 +202,31 @@ fn package_metrics(
     graph: &Graph,
     root_package_id: PackageId,
 ) -> Vec<(PackageInfo, Option<PackageMetrics>)> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut package_metrics =
         Vec::<(PackageInfo, Option<PackageMetrics>)>::new();
-    let root_index = graph.nodes[&root_package_id];
-    let mut indices = vec![root_index];
-    let mut visited = HashSet::new();
+    let root_index: petgraph::prelude::NodeIndex =
+        graph.nodes[&root_package_id];
+    let mut indices: std::vec::Vec<petgraph::prelude::NodeIndex> =
+        vec![root_index];
+    let mut visited: std::collections::HashSet<petgraph::prelude::NodeIndex> =
+        HashSet::new();
 
     while let Some(index) = indices.pop() {
-        let package_id = graph.graph[index].clone();
+        let package_id: krates::PackageId = graph.graph[index].clone();
 
         if let Some(package) = package_id
             .to_cargo_geiger_package_id(cargo_metadata_parameters.metadata)
         {
-            let mut package_info = PackageInfo::new(package);
+            let mut package_info: cargo_geiger_serde::PackageInfo =
+                PackageInfo::new(package);
 
             for edge in graph.graph.edges(index) {
-                let dep_index = edge.target();
+                let dep_index: petgraph::prelude::NodeIndex = edge.target();
 
-                let dependency_kind_option =
-                    edge.weight().to_cargo_geiger_dependency_kind();
+                let dependency_kind_option: std::option::Option<
+                    cargo_geiger_serde::DependencyKind,
+                > = edge.weight().to_cargo_geiger_dependency_kind();
 
                 add_dependency_to_package_info(
                     cargo_metadata_parameters,
@@ -258,7 +270,9 @@ fn add_dependency_to_package_info(
         indices.push(dependency_index);
     }
 
-    let dependency_package_id_option = graph.graph[dependency_index]
+    let dependency_package_id_option: std::option::Option<
+        cargo_geiger_serde::PackageId,
+    > = graph.graph[dependency_index]
         .to_cargo_geiger_package_id(cargo_metadata_parameters.metadata);
 
     match (dependency_package_id_option, dependency_kind_option) {
@@ -304,21 +318,25 @@ mod scan_tests {
         input_dependency_kind_option: Option<DependencyKind>,
         expected_package_info_dependency_length: usize,
     ) {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package_id = metadata.root_package().unwrap().id.clone();
+        let (krates, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
+        let package_id: krates::PackageId =
+            metadata.root_package().unwrap().id.clone();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let cargo_metadata_parameters = CargoMetadataParameters {
             krates: &krates,
             metadata: &metadata,
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut graph = Graph {
             graph: Default::default(),
             nodes: Default::default(),
         };
         graph.graph.add_node(package_id);
 
-        let mut package_info = PackageInfo {
+        let mut package_info: cargo_geiger_serde::PackageInfo = PackageInfo {
             id: cargo_geiger_serde::PackageId {
                 name: String::from("package_id"),
                 version: Version {
@@ -340,10 +358,12 @@ mod scan_tests {
             build_dependencies: Default::default(),
         };
 
-        let mut indices = vec![];
-        let mut visited = HashSet::new();
+        let mut indices: std::vec::Vec<petgraph::prelude::NodeIndex> = vec![];
+        let mut visited: std::collections::HashSet<
+            petgraph::prelude::NodeIndex,
+        > = HashSet::new();
 
-        let dependency_index = NodeIndex::new(0);
+        let dependency_index: petgraph::prelude::NodeIndex = NodeIndex::new(0);
 
         add_dependency_to_package_info(
             &cargo_metadata_parameters,
@@ -364,13 +384,15 @@ mod scan_tests {
 
     #[rstest]
     fn construct_rs_files_used_lines_test() {
-        let mut rs_files_used = HashSet::<PathBuf>::new();
+        let mut rs_files_used: std::collections::HashSet<std::path::PathBuf> =
+            HashSet::<PathBuf>::new();
 
         rs_files_used.insert(PathBuf::from("b/path.rs"));
         rs_files_used.insert(PathBuf::from("a/path.rs"));
         rs_files_used.insert(PathBuf::from("c/path.rs"));
 
-        let rs_files_used_lines = construct_rs_files_used_lines(&rs_files_used);
+        let rs_files_used_lines: std::vec::Vec<std::string::String> =
+            construct_rs_files_used_lines(&rs_files_used);
 
         assert_eq!(
             rs_files_used_lines,
@@ -437,12 +459,15 @@ mod scan_tests {
         input_rs_files_used_vec: Vec<PathBuf>,
         expected_files_used_but_not_scanned: Vec<PathBuf>,
     ) {
-        let (_, metadata) = construct_krates_and_metadata();
-        let package_id = metadata.root_package().unwrap().id.clone();
+        let (_, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
+        let package_id: krates::PackageId =
+            metadata.root_package().unwrap().id.clone();
 
         let rs_path_to_metrics: HashMap<PathBuf, RsFileMetricsWrapper> =
             input_rs_path_to_metrics_vec.iter().cloned().collect();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let geiger_context = GeigerContext {
             package_id_to_metrics: [(
                 package_id,
@@ -454,9 +479,10 @@ mod scan_tests {
             ignored_paths: HashSet::new(),
         };
 
-        let rs_files_used = input_rs_files_used_vec.iter().cloned().collect();
+        let rs_files_used: std::collections::HashSet<std::path::PathBuf> =
+            input_rs_files_used_vec.iter().cloned().collect();
 
-        let mut files_used_but_not_scanned =
+        let mut files_used_but_not_scanned: std::vec::Vec<std::path::PathBuf> =
             list_files_used_but_not_scanned(&geiger_context, &rs_files_used);
 
         files_used_but_not_scanned.sort();
@@ -469,8 +495,9 @@ mod scan_tests {
 
     #[rstest]
     fn unsafe_stats_from_nothing_are_empty() {
-        let stats = unsafe_stats(&Default::default(), &Default::default());
-        let expected = UnsafeInfo {
+        let stats: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&Default::default(), &Default::default());
+        let expected: cargo_geiger_serde::UnsafeInfo = UnsafeInfo {
             forbids_unsafe: true,
             ..Default::default()
         };
@@ -480,6 +507,7 @@ mod scan_tests {
     #[rstest]
     fn unsafe_stats_report_forbid_unsafe_as_true_if_all_entry_points_forbid_unsafe(
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let metrics = metrics_from_iter(vec![(
             "foo.rs",
             MetricsBuilder::default()
@@ -487,13 +515,15 @@ mod scan_tests {
                 .set_is_crate_entry_point(true)
                 .build(),
         )]);
-        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs"]));
+        let stats: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&metrics, &set_of_paths(["foo.rs"]));
         assert!(stats.forbids_unsafe)
     }
 
     #[rstest]
     fn unsafe_stats_report_forbid_unsafe_as_false_if_one_entry_point_allows_unsafe(
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let metrics = metrics_from_iter(vec![
             (
                 "foo.rs",
@@ -510,12 +540,14 @@ mod scan_tests {
                     .build(),
             ),
         ]);
-        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
+        let stats: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
         assert!(!stats.forbids_unsafe)
     }
 
     #[rstest]
     fn unsafe_stats_accumulate_counters() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let metrics = metrics_from_iter(vec![
             ("foo.rs", MetricsBuilder::default().functions(2, 1).build()),
             ("bar.rs", MetricsBuilder::default().functions(5, 3).build()),
@@ -528,7 +560,8 @@ mod scan_tests {
                 MetricsBuilder::default().functions(200, 100).build(),
             ),
         ]);
-        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
+        let stats: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
         assert_eq!(stats.used.functions.safe, 7);
         assert_eq!(stats.used.functions.unsafe_, 4);
         assert_eq!(stats.unused.functions.safe, 220);

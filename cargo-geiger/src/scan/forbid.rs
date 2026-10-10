@@ -46,19 +46,22 @@ fn scan_forbid_to_report(
     print_config: &PrintConfig,
     root_package_id: PackageId,
 ) -> Result<ScanResult, CliError> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let geiger_context = find_unsafe(
         cargo_metadata_parameters,
         gctx,
         ScanMode::EntryPointsOnly,
         print_config,
     )?;
-    let mut report = QuickSafetyReport::default();
+    let mut report: cargo_geiger_serde::QuickSafetyReport =
+        QuickSafetyReport::default();
     for (package, package_metrics) in package_metrics(
         cargo_metadata_parameters,
         &geiger_context,
         graph,
         root_package_id,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let pack_metrics = match package_metrics {
             Some(m) => m,
             None => {
@@ -66,18 +69,18 @@ fn scan_forbid_to_report(
                 continue;
             }
         };
-        let forbids_unsafe = pack_metrics.rs_path_to_metrics.iter().all(
+        let forbids_unsafe: bool = pack_metrics.rs_path_to_metrics.iter().all(
             |(_, rs_file_metrics_wrapper)| {
                 rs_file_metrics_wrapper.metrics.forbids_unsafe
             },
         );
-        let entry = QuickReportEntry {
+        let entry: cargo_geiger_serde::QuickReportEntry = QuickReportEntry {
             package,
             forbids_unsafe,
         };
         report.packages.insert(entry.package.id.clone(), entry);
     }
-    let json_string = match output_format {
+    let json_string: std::string::String = match output_format {
         OutputFormat::Json => serde_json::to_string(&report).unwrap(),
         _ => panic!("Only implemented for OutputFormat::Json"),
     };

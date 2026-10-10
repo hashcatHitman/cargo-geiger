@@ -19,7 +19,7 @@ pub fn create_or_replace_section_in_readme(
     readme_args: &ReadmeArgs,
     scan_output_lines: &[String],
 ) -> CliResult {
-    let readme_path_buf =
+    let readme_path_buf: std::path::PathBuf =
         get_readme_path_buf_from_arguments_or_default(readme_args);
 
     if !readme_path_buf.exists() {
@@ -30,7 +30,7 @@ pub fn create_or_replace_section_in_readme(
         return CliResult::Err(CliError::code(1));
     }
 
-    let mut readme_content =
+    let mut readme_content: std::vec::Vec<std::string::String> =
         read_file_contents(&readme_path_buf).map_err(|e| {
             eprintln!(
                 "Failed to read contents from file: {}",
@@ -59,13 +59,13 @@ fn find_start_and_end_lines_of_safety_report_section(
     readme_args: &ReadmeArgs,
     readme_content: &[String],
 ) -> (i32, i32) {
-    let mut start_line_number = -1;
-    let mut end_line_number = -1;
+    let mut start_line_number: i32 = -1;
+    let mut end_line_number: i32 = -1;
 
-    let start_line_pattern =
+    let start_line_pattern: regex::Regex =
         construct_regex_expression_for_section_header(readme_args);
 
-    let end_line_pattern = Regex::new("^#+.*").unwrap();
+    let end_line_pattern: regex::Regex = Regex::new("^#+.*").unwrap();
 
     for (line_number, line) in readme_content.iter().enumerate() {
         if start_line_pattern.is_match(line) {
@@ -89,7 +89,7 @@ fn construct_regex_expression_for_section_header(
 ) -> Regex {
     match &readme_args.section_name {
         Some(section_name) => {
-            let mut regex_string = String::from("^#+\\s");
+            let mut regex_string: std::string::String = String::from("^#+\\s");
             regex_string.push_str(&section_name.replace(' ', "\\s"));
             regex_string.push_str("\\s*");
 
@@ -109,7 +109,8 @@ fn get_readme_path_buf_from_arguments_or_default(
     match &readme_args.readme_path {
         Some(readme_path) => readme_path.to_path_buf(),
         None => {
-            let mut current_dir_path_buf = std::env::current_dir().unwrap();
+            let mut current_dir_path_buf: std::path::PathBuf =
+                std::env::current_dir().unwrap();
             current_dir_path_buf.push(README_FILENAME);
             current_dir_path_buf
         }
@@ -118,8 +119,8 @@ fn get_readme_path_buf_from_arguments_or_default(
 
 /// Read the contents of a file line by line.
 fn read_file_contents(path: &Path) -> Result<Vec<String>, Error> {
-    let file = File::open(path)?;
-    let buf_reader = BufReader::new(file);
+    let file: std::fs::File = File::open(path)?;
+    let buf_reader: std::io::BufReader<std::fs::File> = BufReader::new(file);
 
     Ok(buf_reader
         .lines()
@@ -135,7 +136,7 @@ fn update_readme_content(
     readme_content: &mut Vec<String>,
     scan_result: &[String],
 ) {
-    let (start_line_number, mut end_line_number) =
+    let (start_line_number, mut end_line_number): (i32, i32) =
         find_start_and_end_lines_of_safety_report_section(
             readme_args,
             readme_content,
@@ -146,7 +147,8 @@ fn update_readme_content(
         // h2 headed section at the end of the README.md containing the report
         match &readme_args.section_name {
             Some(section_name) => {
-                let mut section_name_string = String::from("## ");
+                let mut section_name_string: std::string::String =
+                    String::from("## ");
                 section_name_string.push_str(section_name);
 
                 readme_content.push(section_name_string);
@@ -173,7 +175,7 @@ fn update_readme_content(
             readme_content.remove((start_line_number + 1) as usize);
         }
 
-        let mut running_scan_line_index = start_line_number + 1;
+        let mut running_scan_line_index: i32 = start_line_number + 1;
 
         readme_content
             .insert(running_scan_line_index as usize, String::from("```"));
@@ -194,7 +196,7 @@ fn update_readme_content(
 
 /// Write a Vec<String> line by line to a file, overwriting the current file, if it exists.
 fn write_lines_to_file(lines: &[String], path: &Path) -> Result<(), Error> {
-    let mut readme_file = File::create(path)?;
+    let mut readme_file: std::fs::File = File::create(path)?;
 
     for line in lines {
         writeln!(readme_file, "{}", line)?
@@ -213,17 +215,18 @@ mod readme_tests {
 
     #[rstest]
     fn create_or_replace_section_test_readme_doesnt_exist() {
-        let temp_dir = tempdir().unwrap();
-        let readme_path = temp_dir.path().join("README.md");
+        let temp_dir: tempfile::TempDir = tempdir().unwrap();
+        let readme_path: std::path::PathBuf = temp_dir.path().join("README.md");
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs {
             readme_path: Some(readme_path),
             ..Default::default()
         };
 
-        let scan_result = vec![];
+        let scan_result: std::vec::Vec<std::string::String> = vec![];
 
-        let result =
+        let result: std::result::Result<(), cargo::CliError> =
             create_or_replace_section_in_readme(&readme_args, &scan_result);
 
         assert!(result.is_err());
@@ -231,16 +234,18 @@ mod readme_tests {
 
     #[rstest]
     fn create_or_replace_section_test_readme_doesnt_contain_section() {
-        let temp_dir = tempdir().unwrap();
-        let readme_path = temp_dir.path().join("README.md");
+        let temp_dir: tempfile::TempDir = tempdir().unwrap();
+        let readme_path: std::path::PathBuf = temp_dir.path().join("README.md");
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs {
             readme_path: Some(readme_path.clone()),
             ..Default::default()
         };
 
-        let mut readme_file = File::create(readme_path.clone()).unwrap();
-        let scan_result = vec![
+        let mut readme_file: std::fs::File =
+            File::create(readme_path.clone()).unwrap();
+        let scan_result: std::vec::Vec<std::string::String> = vec![
             String::from("First safety report line"),
             String::from("Second safety report line"),
             String::from("Third safety report line"),
@@ -251,18 +256,18 @@ mod readme_tests {
             "# Readme Header\nSome text\nAnother line\n## Another header\nMore text"
         ).unwrap();
 
-        let result =
+        let result: std::result::Result<(), cargo::CliError> =
             create_or_replace_section_in_readme(&readme_args, &scan_result);
 
         assert!(result.is_ok());
 
-        let updated_file_content =
+        let updated_file_content: std::vec::Vec<std::string::String> =
             BufReader::new(File::open(readme_path).unwrap())
                 .lines()
                 .map(|l| l.unwrap())
                 .collect::<Vec<String>>();
 
-        let expected_readme_content = vec![
+        let expected_readme_content: std::vec::Vec<std::string::String> = vec![
             String::from("# Readme Header"),
             String::from("Some text"),
             String::from("Another line"),
@@ -301,7 +306,7 @@ mod readme_tests {
         input_readme_args: ReadmeArgs,
         expected_regex_expression: Regex,
     ) {
-        let regex_expression =
+        let regex_expression: regex::Regex =
             construct_regex_expression_for_section_header(&input_readme_args);
 
         assert_eq!(
@@ -372,9 +377,10 @@ mod readme_tests {
         expected_start_line_number: i32,
         expected_end_line_number: i32,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs::default();
 
-        let (start_line_number, end_line_number) =
+        let (start_line_number, end_line_number): (i32, i32) =
             find_start_and_end_lines_of_safety_report_section(
                 &readme_args,
                 &input_readme_content,
@@ -386,15 +392,16 @@ mod readme_tests {
 
     #[rstest]
     fn get_readme_path_buf_from_arguments_or_default_test_none() {
-        let mut path_buf = std::env::current_dir().unwrap();
+        let mut path_buf: std::path::PathBuf = std::env::current_dir().unwrap();
         path_buf.push(README_FILENAME);
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs {
             readme_path: None,
             ..Default::default()
         };
 
-        let readme_path_buf =
+        let readme_path_buf: std::path::PathBuf =
             get_readme_path_buf_from_arguments_or_default(&readme_args);
 
         assert_eq!(readme_path_buf, path_buf)
@@ -402,14 +409,15 @@ mod readme_tests {
 
     #[rstest]
     fn get_readme_path_buf_from_arguments_or_default_test_some() {
-        let path_buf = PathBuf::from("/test/path");
+        let path_buf: std::path::PathBuf = PathBuf::from("/test/path");
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs {
             readme_path: Some(path_buf.clone()),
             ..Default::default()
         };
 
-        let readme_path_buf =
+        let readme_path_buf: std::path::PathBuf =
             get_readme_path_buf_from_arguments_or_default(&readme_args);
 
         assert_eq!(readme_path_buf, path_buf);
@@ -437,14 +445,14 @@ mod readme_tests {
         input_readme_args: ReadmeArgs,
         expected_section_header: String,
     ) {
-        let mut readme_content = vec![
+        let mut readme_content: std::vec::Vec<std::string::String> = vec![
             String::from("# readme header"),
             String::from("line of text"),
             String::from("another line of text"),
             String::from("## another header"),
         ];
 
-        let scan_result = vec![
+        let scan_result: std::vec::Vec<std::string::String> = vec![
             String::from("first line of scan result"),
             String::from("second line of scan result"),
             String::from("third line of scan result"),
@@ -456,7 +464,7 @@ mod readme_tests {
             &scan_result,
         );
 
-        let expected_readme_content = vec![
+        let expected_readme_content: std::vec::Vec<std::string::String> = vec![
             String::from("# readme header"),
             String::from("line of text"),
             String::from("another line of text"),
@@ -474,9 +482,10 @@ mod readme_tests {
 
     #[rstest]
     fn update_readme_content_test_safety_report_present_in_middle_of_readme() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let readme_args = ReadmeArgs::default();
 
-        let mut readme_content = vec![
+        let mut readme_content: std::vec::Vec<std::string::String> = vec![
             String::from("# readme header"),
             String::from("line of text"),
             String::from("another line of text"),
@@ -487,7 +496,7 @@ mod readme_tests {
             String::from("line of text"),
         ];
 
-        let scan_result = vec![
+        let scan_result: std::vec::Vec<std::string::String> = vec![
             String::from("first line of scan result"),
             String::from("second line of scan result"),
             String::from("third line of scan result"),
@@ -495,7 +504,7 @@ mod readme_tests {
 
         update_readme_content(&readme_args, &mut readme_content, &scan_result);
 
-        let expected_readme_content = vec![
+        let expected_readme_content: std::vec::Vec<std::string::String> = vec![
             String::from("# readme header"),
             String::from("line of text"),
             String::from("another line of text"),

@@ -105,16 +105,16 @@ mod tests {
 
     #[test]
     fn find_unsafe() {
-        let temp_dir = tempdir().unwrap();
-        let file_path = temp_dir.path().join("lib.rs");
+        let temp_dir: tempfile::TempDir = tempdir().unwrap();
+        let file_path: std::path::PathBuf = temp_dir.path().join("lib.rs");
         std::fs::write(&file_path, FILE_CONTENT_STRING).unwrap();
 
-        let from_file =
+        let from_file: RsFileMetrics =
             find_unsafe_in_file(&file_path, IncludeTests::No).unwrap();
-        let from_string =
+        let from_string: RsFileMetrics =
             find_unsafe_in_string(FILE_CONTENT_STRING, IncludeTests::No)
                 .unwrap();
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             counters: CounterBlock {
                 functions: Count {
                     safe: 1,
@@ -131,12 +131,12 @@ mod tests {
         assert_eq!(from_file, expected);
         assert_eq!(from_string, expected);
 
-        let from_file =
+        let from_file: RsFileMetrics =
             find_unsafe_in_file(&file_path, IncludeTests::Yes).unwrap();
-        let from_string =
+        let from_string: RsFileMetrics =
             find_unsafe_in_string(FILE_CONTENT_STRING, IncludeTests::Yes)
                 .unwrap();
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             counters: CounterBlock {
                 functions: Count {
                     safe: 2,
@@ -156,11 +156,11 @@ mod tests {
 
     #[test]
     fn forbids_unsafe() {
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             forbids_unsafe: true,
             ..DEFAULT_METRICS
         };
-        let actual =
+        let actual: RsFileMetrics =
             find_unsafe_in_string("#![forbid(unsafe_code)]", IncludeTests::No)
                 .unwrap();
         assert_eq!(actual, expected);
@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn counters_functions() {
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             counters: CounterBlock {
                 functions: Count {
                     safe: 2,
@@ -182,7 +182,7 @@ mod tests {
             },
             ..DEFAULT_METRICS
         };
-        let file = "
+        let file: &str = "
             pub fn f() { f(); }
             pub fn f() { f(); }
             pub unsafe fn f() { f(); }
@@ -191,13 +191,13 @@ mod tests {
             #[export_name = \"exported_e\"]
             pub unsafe fn f() { f(); }
         ";
-        let actual = find_unsafe_in_string(file, IncludeTests::No).unwrap();
+        let actual: RsFileMetrics = find_unsafe_in_string(file, IncludeTests::No).unwrap();
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn counters_exprs() {
-        let file = "
+        let file: &str = "
             pub fn f() {
                 f();
                 x.f();
@@ -214,7 +214,7 @@ mod tests {
             #[test]
             pub fn f() { f(); }
         ";
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             counters: CounterBlock {
                 functions: Count {
                     safe: 2,
@@ -228,13 +228,13 @@ mod tests {
             },
             ..DEFAULT_METRICS
         };
-        let actual = find_unsafe_in_string(file, IncludeTests::No).unwrap();
+        let actual: RsFileMetrics = find_unsafe_in_string(file, IncludeTests::No).unwrap();
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn counters_exprs_include_tests() {
-        let file = "
+        let file: &str = "
             pub fn f() { f(); }
             pub unsafe fn f() { f(); }
             #[cfg(test)]
@@ -251,7 +251,7 @@ mod tests {
                 unsafe { f(); }
             }
         ";
-        let expected = RsFileMetrics {
+        let expected: RsFileMetrics = RsFileMetrics {
             counters: CounterBlock {
                 functions: Count {
                     safe: 3,
@@ -265,7 +265,7 @@ mod tests {
             },
             ..DEFAULT_METRICS
         };
-        let actual = find_unsafe_in_string(file, IncludeTests::Yes).unwrap();
+        let actual: RsFileMetrics = find_unsafe_in_string(file, IncludeTests::Yes).unwrap();
         assert_eq!(actual, expected);
     }
 }

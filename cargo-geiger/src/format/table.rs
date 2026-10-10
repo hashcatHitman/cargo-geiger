@@ -36,12 +36,17 @@ pub fn create_table_from_text_tree_lines(
     table_parameters: &TableParameters,
     text_tree_lines: Vec<TextTreeLine>,
 ) -> ScanResult {
-    let mut table_lines = Vec::<String>::new();
+    let mut table_lines: std::vec::Vec<std::string::String> =
+        Vec::<String>::new();
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut total_package_counts = TotalPackageCounts::new();
-    let mut warning_count = 0;
-    let mut visited_package_ids = HashSet::new();
+    let mut warning_count: u64 = 0;
+    let mut visited_package_ids: std::collections::HashSet<krates::PackageId> =
+        HashSet::new();
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let emoji_symbols =
         EmojiSymbols::new(table_parameters.print_config.output_format);
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut handle_package_parameters = HandlePackageParameters {
         total_package_counts: &mut total_package_counts,
         visited_package_ids: &mut visited_package_ids,
@@ -73,6 +78,7 @@ pub fn create_table_from_text_tree_lines(
     }
 
     table_lines.push(String::new());
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let total_detection_status =
         total_package_counts.get_total_detection_status();
 
@@ -109,7 +115,7 @@ fn table_footer_unsafe_counts(
     let fmt = |used: &Count, not_used: &Count| {
         format!("{}/{}", used.unsafe_, used.unsafe_ + not_used.unsafe_)
     };
-    let output = format!(
+    let output: std::string::String = format!(
         "{: <10} {: <12} {: <6} {: <7} {}",
         fmt(&used.functions, &not_used.functions),
         fmt(&used.exprs, &not_used.exprs),
@@ -143,7 +149,7 @@ fn table_footer_safe_ratio(
             }
         )
     };
-    let output = format!(
+    let output: std::string::String = format!(
         "{: <12} {: <18} {: <18} {: <12} {: <12}",
         fmt(&used.functions, &not_used.functions),
         fmt(&used.exprs, &not_used.exprs),
@@ -227,9 +233,9 @@ fn table_row(
 }
 
 fn table_row_empty() -> String {
-    let headers_but_last =
+    let headers_but_last: &[&str] =
         &UNSAFE_COUNTERS_HEADER[..UNSAFE_COUNTERS_HEADER.len() - 1];
-    let n = headers_but_last
+    let n: usize = headers_but_last
         .iter()
         .map(|s| s.len())
         .sum::<usize>()
@@ -275,11 +281,13 @@ mod table_tests {
         input_output_format: OutputFormat,
         expected_line: String,
     ) {
-        let used_counter_block = create_counter_block();
-        let not_used_counter_block = create_counter_block();
+        let used_counter_block: cargo_geiger_serde::CounterBlock =
+            create_counter_block();
+        let not_used_counter_block: cargo_geiger_serde::CounterBlock =
+            create_counter_block();
 
         for crate_detection_status in CrateDetectionStatus::iter() {
-            let table_footer = table_footer(
+            let table_footer: colored::ColoredString = table_footer(
                 used_counter_block.clone(),
                 not_used_counter_block.clone(),
                 input_output_format,
@@ -299,6 +307,7 @@ mod table_tests {
 
     #[rstest]
     fn table_row_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut rs_path_to_metrics =
             HashMap::<PathBuf, RsFileMetricsWrapper>::new();
 
@@ -317,6 +326,7 @@ mod table_tests {
             create_rs_file_metrics_wrapper(false, false),
         );
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let package_metrics = PackageMetrics { rs_path_to_metrics };
         let rs_files_used: HashSet<PathBuf> = [
             Path::new("package_1_path").to_path_buf(),
@@ -325,16 +335,17 @@ mod table_tests {
         .iter()
         .cloned()
         .collect();
-        let unsafety = unsafe_stats(&package_metrics, &rs_files_used);
+        let unsafety: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&package_metrics, &rs_files_used);
 
-        let table_row =
+        let table_row: std::string::String =
             table_row(&unsafety.used, &unsafety.unused, OutputFormat::Ascii);
         assert_eq!(table_row, "4/6        8/12         12/18  16/24   20/30  ");
     }
 
     #[rstest]
     fn table_row_empty_test() {
-        let empty_table_row = table_row_empty();
+        let empty_table_row: std::string::String = table_row_empty();
         assert_eq!(empty_table_row.len(), 55);
     }
 
@@ -353,6 +364,7 @@ mod table_tests {
         input_unsafe_detected: i32,
         expected_crate_detection_status: CrateDetectionStatus,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let total_detection_status = TotalPackageCounts {
             none_detected_forbids_unsafe: input_none_detected_forbids_unsafe,
             none_detected_allows_unsafe: input_none_detected_allows_unsafe,

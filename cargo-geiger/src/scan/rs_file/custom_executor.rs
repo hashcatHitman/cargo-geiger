@@ -50,13 +50,13 @@ impl Executor for CustomExecutor {
         _on_stderr_line: &mut dyn FnMut(&str) -> CargoResult<()>,
     ) -> CargoResult<()> {
         let mut args = cmd.get_args();
-        let out_dir_key = OsString::from("--out-dir");
+        let out_dir_key: std::ffi::OsString = OsString::from("--out-dir");
 
         args.position(|s| *s == out_dir_key).ok_or_else(|| {
             CustomExecutorError::OutDirKeyMissing(cmd.to_string())
         })?;
 
-        let out_dir = args
+        let out_dir: std::path::PathBuf = args
             .next()
             .ok_or_else(|| {
                 CustomExecutorError::OutDirValueMissing(cmd.to_string())
@@ -66,13 +66,14 @@ impl Executor for CustomExecutor {
         // This can be different from the cwd used to launch the wrapping cargo
         // plugin. Discovered while fixing
         // https://github.com/rust-secure-code/cargo-geiger/issues/19
-        let cwd = cmd
+        let cwd: std::path::PathBuf = cmd
             .get_cwd()
             .map(PathBuf::from)
             .unwrap_or_else(|| self.cwd.to_owned());
 
         {
             // Scope to drop and release the mutex before calling rustc.
+            #[expect(clippy::undeclared_type, reason = "Borked!")]
             let mut ctx = self.inner_ctx.lock().map_err(|e| {
                 CustomExecutorError::InnerContextMutex(e.to_string())
             })?;
@@ -80,8 +81,8 @@ impl Executor for CustomExecutor {
                 .map(|s| (s, s.to_string_lossy().to_lowercase()))
                 .filter(|(_, arg_value)| arg_value.ends_with(".rs"))
             {
-                let raw_path = cwd.join(arg_name);
-                let path = raw_path
+                let raw_path: std::path::PathBuf = cwd.join(arg_name);
+                let path: std::path::PathBuf = raw_path
                     .canonicalize()
                     .map_err(|e| CustomExecutorError::Io(e, raw_path))?;
                 ctx.rs_file_args.insert(path);

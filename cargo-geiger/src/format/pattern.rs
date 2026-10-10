@@ -30,9 +30,11 @@ impl Pattern {
     }
 
     pub fn try_build(format: &str) -> Result<Pattern, Box<dyn Error>> {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut chunks = vec![];
 
         for raw in Parser::new(format) {
+            #[expect(clippy::undeclared_type, reason = "Borked!")]
             let chunk = match raw {
                 RawChunk::Text(text) => Chunk::Raw(text.to_owned()),
                 RawChunk::Argument("p") => Chunk::Package,
@@ -80,6 +82,7 @@ mod pattern_tests {
         input_format_string: &str,
         expected_pattern: Pattern,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let pattern_result = Pattern::try_build(input_format_string);
         assert!(pattern_result.is_ok());
         assert_eq!(pattern_result.unwrap(), expected_pattern);

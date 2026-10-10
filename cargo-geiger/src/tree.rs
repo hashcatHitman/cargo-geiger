@@ -31,19 +31,21 @@ fn construct_tree_vines_string(
     levels_continue: &mut [bool],
     print_config: &PrintConfig,
 ) -> String {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let tree_symbols = get_tree_symbols(print_config.output_format);
 
     match print_config.prefix {
         Prefix::Depth => format!("{} ", levels_continue.len()),
         Prefix::Indent => {
-            let mut buffer = String::new();
+            let mut buffer: std::string::String = String::new();
             if let Some((&last_continues, rest)) = levels_continue.split_last()
             {
                 for &continues in rest {
-                    let c = if continues { tree_symbols.down } else { " " };
+                    let c: &str =
+                        if continues { tree_symbols.down } else { " " };
                     (write!(buffer, "{}   ", c)).unwrap();
                 }
-                let c = if last_continues {
+                let c: &str = if last_continues {
                     tree_symbols.tee
                 } else {
                     tree_symbols.ell
@@ -99,10 +101,11 @@ mod tree_tests {
         input_prefix: Prefix,
         expected_tree_vines_string: &str,
     ) {
-        let mut levels_continue = vec![true, false, true];
+        let mut levels_continue: std::vec::Vec<bool> = vec![true, false, true];
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config = construct_print_config(input_prefix);
-        let tree_vines_string =
+        let tree_vines_string: std::string::String =
             construct_tree_vines_string(&mut levels_continue, &print_config);
 
         assert_eq!(tree_vines_string, expected_tree_vines_string);
@@ -126,6 +129,7 @@ mod tree_tests {
     }
 
     fn construct_print_config(prefix: Prefix) -> PrintConfig {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let pattern = Pattern::try_build("{p}").unwrap();
         PrintConfig {
             all: false,

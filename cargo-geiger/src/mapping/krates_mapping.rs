@@ -18,7 +18,7 @@ impl GetPackage for Krates {
         package_id: &CargoMetadataPackageId,
     ) -> Option<&Package> {
         let kid: Kid = package_id.clone().into();
-        let node = self.node_for_kid(&kid)?;
+        let node: &krates::Node<krates::Package> = self.node_for_kid(&kid)?;
         match node {
             Node::Krate { krate, .. } => Some(krate),
             Node::Feature { .. } => None,
@@ -56,39 +56,39 @@ mod krates_tests {
 
     #[rstest]
     fn get_licence_from_cargo_metadata_package_id_test() {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
-        let licence_option = &package.id.get_package_id_licence(&krates);
+        let (krates, metadata): (krates::Krates, krates::Metadata) = construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
+        let licence_option: &std::option::Option<std::string::String> = &package.id.get_package_id_licence(&krates);
         assert!(licence_option.as_ref().is_some());
-        let licence = licence_option.as_ref().unwrap();
+        let licence: &std::string::String = licence_option.as_ref().unwrap();
         assert_eq!(licence, &String::from("Apache-2.0 OR MIT"))
     }
 
     #[rstest]
     fn get_package_name_from_cargo_metadata_package_id_test() {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
-        let (package_name, _) =
+        let (krates, metadata): (krates::Krates, krates::Metadata) = construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
+        let (package_name, _): (std::string::String, semver::Version) =
             package.id.get_package_id_name_and_version(&krates).unwrap();
         assert_eq!(package_name, package.name);
     }
 
     #[rstest]
     fn get_package_version_from_cargo_metadata_package_id_test() {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
-        let (_, package_version) =
+        let (krates, metadata): (krates::Krates, krates::Metadata) = construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
+        let (_, package_version): (std::string::String, semver::Version) =
             package.id.get_package_id_name_and_version(&krates).unwrap();
         assert_eq!(package_version, package.version);
     }
 
     #[rstest]
     fn get_repository_from_cargo_metadata_package_id_test() {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
-        let repository_option = &package.id.get_package_id_repository(&krates);
+        let (krates, metadata): (krates::Krates, krates::Metadata) = construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
+        let repository_option: &std::option::Option<std::string::String> = &package.id.get_package_id_repository(&krates);
         assert!(repository_option.is_some());
-        let repository = repository_option.as_ref().unwrap();
+        let repository: &std::string::String = repository_option.as_ref().unwrap();
         assert_eq!(
             repository,
             &String::from("https://github.com/rust-secure-code/cargo-geiger")
@@ -116,10 +116,10 @@ mod krates_tests {
         expected_package_name: &str,
         expected_package_version: Version,
     ) {
-        let (krates, _) = construct_krates_and_metadata();
-        let package_id = krates.query_resolve(input_query_string).unwrap();
+        let (krates, _): (krates::Krates, krates::Metadata) = construct_krates_and_metadata();
+        let package_id: krates::PackageId = krates.query_resolve(input_query_string).unwrap();
 
-        let (package_name, package_version) =
+        let (package_name, package_version): (std::string::String, semver::Version) =
             package_id.get_package_id_name_and_version(&krates).unwrap();
 
         assert_eq!(package_name, expected_package_name);

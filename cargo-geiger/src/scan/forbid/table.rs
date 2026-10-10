@@ -22,12 +22,16 @@ pub fn scan_forbid_to_table(
     print_config: &PrintConfig,
     root_package_id: PackageId,
 ) -> Result<ScanResult, CliError> {
-    let mut scan_output_lines = Vec::<String>::new();
+    let mut scan_output_lines: std::vec::Vec<std::string::String> =
+        Vec::<String>::new();
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let emoji_symbols = EmojiSymbols::new(print_config.output_format);
 
-    let mut output_key_lines = construct_key_lines(&emoji_symbols);
+    let mut output_key_lines: std::vec::Vec<std::string::String> =
+        construct_key_lines(&emoji_symbols);
     scan_output_lines.append(&mut output_key_lines);
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let tree_lines = walk_dependency_tree(
         cargo_metadata_parameters,
         graph,
@@ -38,11 +42,11 @@ pub fn scan_forbid_to_table(
     for tree_line in tree_lines {
         match tree_line {
             TextTreeLine::ExtraDepsGroup { kind, tree_vines } => {
-                let name = get_kind_group_name(kind);
+                let name: std::option::Option<&str> = get_kind_group_name(kind);
                 if name.is_none() {
                     continue;
                 }
-                let name = name.unwrap();
+                let name: &str = name.unwrap();
                 // TODO: Fix the alignment on macOS (others too?)
                 scan_output_lines.push(format!("  {}{}", tree_vines, name));
             }
@@ -50,6 +54,7 @@ pub fn scan_forbid_to_table(
                 id: package_id,
                 tree_vines,
             } => {
+                #[expect(clippy::undeclared_type, reason = "Borked!")]
                 let geiger_ctx = find_unsafe(
                     cargo_metadata_parameters,
                     gctx,
@@ -77,11 +82,14 @@ pub fn scan_forbid_to_table(
 }
 
 fn construct_key_lines(emoji_symbols: &EmojiSymbols) -> Vec<String> {
-    let mut output_key_lines = vec![String::new(), String::from("Symbols:")];
+    let mut output_key_lines: std::vec::Vec<std::string::String> =
+        vec![String::new(), String::from("Symbols:")];
 
-    let forbids = "All entry point .rs files declare #![forbid(unsafe_code)].";
-    let unknown = "This crate may use unsafe code.";
+    let forbids: &str =
+        "All entry point .rs files declare #![forbid(unsafe_code)].";
+    let unknown: &str = "This crate may use unsafe code.";
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let symbol_kinds_to_string_values = vec![
         (SymbolKind::Lock, forbids),
         (SymbolKind::QuestionMark, unknown),
@@ -116,16 +124,19 @@ fn handle_package_text_tree_line(
     scan_output_lines: &mut Vec<String>,
     tree_vines: String,
 ) {
-    let sym_lock = emoji_symbols.emoji(SymbolKind::Lock);
-    let sym_qmark = emoji_symbols.emoji(SymbolKind::QuestionMark);
+    let sym_lock: std::boxed::Box<dyn std::fmt::Display> =
+        emoji_symbols.emoji(SymbolKind::Lock);
+    let sym_qmark: std::boxed::Box<dyn std::fmt::Display> =
+        emoji_symbols.emoji(SymbolKind::QuestionMark);
 
-    let name = format_package_name(
+    let name: std::string::String = format_package_name(
         cargo_metadata_parameters,
         &package_id,
         &print_config.format,
     );
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let package_metrics = geiger_ctx.package_id_to_metrics.get(&package_id);
-    let package_forbids_unsafe = match package_metrics {
+    let package_forbids_unsafe: bool = match package_metrics {
         None => false, // no metrics available, .rs parsing failed?
         Some(package_metric) => package_metric.rs_path_to_metrics.iter().all(
             |(_k, rs_file_metrics_wrapper)| {
@@ -133,7 +144,10 @@ fn handle_package_text_tree_line(
             },
         ),
     };
-    let (symbol, name) = if package_forbids_unsafe {
+    let (symbol, name): (
+        &std::boxed::Box<dyn std::fmt::Display>,
+        colored::ColoredString,
+    ) = if package_forbids_unsafe {
         (&sym_lock, name.green())
     } else {
         (&sym_qmark, name.red())
@@ -149,8 +163,10 @@ mod forbid_tests {
 
     #[rstest]
     fn construct_scan_mode_forbid_only_output_key_lines_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let emoji_symbols = EmojiSymbols::new(OutputFormat::Utf8);
-        let output_key_lines = construct_key_lines(&emoji_symbols);
+        let output_key_lines: std::vec::Vec<std::string::String> =
+            construct_key_lines(&emoji_symbols);
 
         assert_eq!(output_key_lines.len(), 5);
     }

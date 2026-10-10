@@ -11,7 +11,7 @@ pub struct EmojiSymbols {
 
 impl EmojiSymbols {
     pub fn emoji(&self, kind: SymbolKind) -> Box<dyn std::fmt::Display> {
-        let idx = kind as usize;
+        let idx: usize = kind as usize;
         if self.will_output_emoji() {
             Box::new(self.emojis[idx])
         } else {

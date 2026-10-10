@@ -102,6 +102,7 @@ impl Args {
     pub fn parse_args(
         mut raw_args: Arguments,
     ) -> Result<Args, Box<dyn std::error::Error>> {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut args = Args {
             all: raw_args.contains(["-a", "--all"]),
             color: raw_args.opt_value_from_str("--color")?,
@@ -186,8 +187,8 @@ impl Args {
     /// args.update_config(&mut gctx);
     /// ```
     pub fn update_config(&self, gctx: &mut GlobalContext) -> CliResult {
-        let target_dir = None; // Doesn't add any value for cargo-geiger.
-        let cargo_config_verbosity = match self.verbosity {
+        let target_dir: std::option::Option<std::path::PathBuf> = None; // Doesn't add any value for cargo-geiger.
+        let cargo_config_verbosity: u32 = match self.verbosity {
             Quiet => 0,
             Normal => 1,
             Verbose => 2,
@@ -324,11 +325,13 @@ pub mod args_tests {
         expected_output_format: OutputFormat,
         expected_verbosity: Verbosity,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args_result =
             Args::parse_args(Arguments::from_vec(input_argument_vector));
 
         assert!(args_result.is_ok());
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = args_result.unwrap();
         assert_eq!(args.all, expected_all);
         assert_eq!(args.output_format, expected_output_format);
@@ -382,15 +385,17 @@ pub mod args_tests {
         expected_extra_verbose: bool,
         expected_shell_verbosity: CargoCoreVerbosity,
     ) {
-        let offline = rand::random();
+        let offline: bool = rand::random();
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             offline,
             quiet: input_quiet,
             verbosity: input_verbosity,
             ..Default::default()
         };
-        let mut gctx = GlobalContext::default().unwrap();
-        let update_config_result = args.update_config(&mut gctx);
+        let mut gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let update_config_result: std::result::Result<(), cargo::CliError> =
+            args.update_config(&mut gctx);
 
         assert!(update_config_result.is_ok());
         assert_eq!(gctx.extra_verbose(), expected_extra_verbose);
@@ -411,14 +416,16 @@ pub mod args_tests {
         input_color: Option<String>,
         expected_shell_color_choice: ColorChoice,
     ) {
-        let offline = rand::random();
+        let offline: bool = rand::random();
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             color: input_color,
             offline,
             ..Default::default()
         };
-        let mut gctx = GlobalContext::default().unwrap();
-        let update_config_result = args.update_config(&mut gctx);
+        let mut gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let update_config_result: std::result::Result<(), cargo::CliError> =
+            args.update_config(&mut gctx);
 
         assert!(update_config_result.is_ok());
         assert_eq!(gctx.shell().color_choice(), expected_shell_color_choice);
@@ -442,15 +449,17 @@ pub mod args_tests {
         expected_frozen: bool,
         expected_lock_update_allowed: bool,
     ) {
-        let offline = rand::random();
+        let offline: bool = rand::random();
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             frozen: input_frozen,
             locked: input_locked,
             offline,
             ..Default::default()
         };
-        let mut gctx = GlobalContext::default().unwrap();
-        let update_config_result = args.update_config(&mut gctx);
+        let mut gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let update_config_result: std::result::Result<(), cargo::CliError> =
+            args.update_config(&mut gctx);
 
         assert!(update_config_result.is_ok());
         assert_eq!(gctx.frozen(), expected_frozen);

@@ -23,8 +23,10 @@ pub fn walk_dependency_kind(
     // Resolve uses Hash data types internally but we want consistent output ordering
     deps.sort_by_key(|n| n.clone());
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let tree_symbols =
         get_tree_symbols(walk_dependency_parameters.print_config.output_format);
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut text_tree_lines = Vec::new();
     if let Prefix::Indent = walk_dependency_parameters.print_config.prefix {
         push_extra_deps_group_text_tree_line_for_non_normal_dependencies(
@@ -35,7 +37,9 @@ pub fn walk_dependency_kind(
         )
     }
 
-    let mut node_iterator = deps.iter().peekable();
+    let mut node_iterator: std::iter::Peekable<
+        std::slice::Iter<'_, krates::PackageId>,
+    > = deps.iter().peekable();
     while let Some(dependency) = node_iterator.next() {
         handle_walk_dependency_node(
             cargo_metadata_parameters,
@@ -75,9 +79,9 @@ fn push_extra_deps_group_text_tree_line_for_non_normal_dependencies(
     match dep_kind {
         DependencyKind::Normal => (),
         _ => {
-            let mut tree_vines = String::new();
+            let mut tree_vines: std::string::String = String::new();
             for &continues in levels_continue {
-                let c = if continues { tree_symbols.down } else { " " };
+                let c: &str = if continues { tree_symbols.down } else { " " };
                 (write!(tree_vines, "{}   ", c)).unwrap()
             }
             text_tree_lines.push(TextTreeLine::ExtraDepsGroup {
@@ -159,6 +163,7 @@ mod traversal_tests {
         expected_text_tree_lines: Vec<TextTreeLine>,
     ) {
         let mut text_tree_lines: Vec<TextTreeLine> = vec![];
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let tree_symbols = get_tree_symbols(OutputFormat::Utf8);
 
         push_extra_deps_group_text_tree_line_for_non_normal_dependencies(

@@ -30,8 +30,11 @@ impl DepsNotReplaced for Metadata {
         is_root_package: bool,
     ) -> Option<Vec<(CargoMetadataPackageId, HashSet<CargoMetadataDependency>)>>
     {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut cargo_metadata_deps_not_replaced = vec![];
-        let mut package_id_hashset = HashSet::<CargoMetadataPackageId>::new();
+        let mut package_id_hashset: std::collections::HashSet<
+            krates::PackageId,
+        > = HashSet::<CargoMetadataPackageId>::new();
 
         match package_id.to_cargo_metadata_package(self) {
             Some(package) => {
@@ -117,7 +120,8 @@ impl ToCargoGeigerPackageId for CargoMetadataPackageId {
     ) -> Option<cargo_geiger_serde::PackageId> {
         match self.to_cargo_metadata_package(metadata) {
             Some(package) => {
-                let metadata_source = self.to_cargo_geiger_source(metadata);
+                let metadata_source: cargo_geiger_serde::Source =
+                    self.to_cargo_geiger_source(metadata);
                 Some(cargo_geiger_serde::PackageId {
                     name: package.name,
                     version: package.version,
@@ -172,34 +176,43 @@ mod metadata_tests {
 
     #[rstest]
     fn deps_not_replaced_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = FeaturesArgs::default();
-        let gctx = GlobalContext::default().unwrap();
-        let (package, mut registry, workspace) =
-            construct_package_registry_workspace_tuple(&gctx);
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let (package, mut registry, workspace): (
+            cargo::core::Package,
+            cargo::core::registry::PackageRegistry<'_>,
+            cargo::core::Workspace<'_>,
+        ) = construct_package_registry_workspace_tuple(&gctx);
 
-        let (_, resolve) =
+        let (_, resolve): (cargo::core::PackageSet<'_>, cargo::core::Resolve) =
             resolve(&args, package.package_id(), &mut registry, &workspace)
                 .unwrap();
 
-        let (krates, metadata) = construct_krates_and_metadata();
-        let cargo_metadata_package_id = package
+        let (krates, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
+        let cargo_metadata_package_id: krates::PackageId = package
             .package_id()
             .to_cargo_metadata_package_id(&metadata)
             .unwrap();
 
         let deps_not_replaced = resolve.deps_not_replaced(package.package_id());
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let cargo_metadata_deps_not_replaced = metadata
             .deps_not_replaced(&cargo_metadata_package_id, true)
             .unwrap();
 
-        let mut cargo_core_package_names = deps_not_replaced
-            .map(|(p, _)| p.name().to_string())
-            .collect::<Vec<String>>();
+        let mut cargo_core_package_names: std::vec::Vec<std::string::String> =
+            deps_not_replaced
+                .map(|(p, _)| p.name().to_string())
+                .collect::<Vec<String>>();
 
-        let mut cargo_metadata_package_names = cargo_metadata_deps_not_replaced
+        let mut cargo_metadata_package_names: std::vec::Vec<
+            std::string::String,
+        > = cargo_metadata_deps_not_replaced
             .iter()
             .map(|(p, _)| {
-                let (name, _) =
+                let (name, _): (std::string::String, semver::Version) =
                     p.get_package_id_name_and_version(&krates).unwrap();
                 name
             })
@@ -213,9 +226,10 @@ mod metadata_tests {
 
     #[rstest]
     fn get_root_test() {
-        let (_, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
-        let package_root = package.get_root().unwrap();
+        let (_, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
+        let package_root: std::path::PathBuf = package.get_root().unwrap();
         assert_eq!(
             package_root,
             package.manifest_path.parent().unwrap().to_path_buf()
@@ -224,16 +238,18 @@ mod metadata_tests {
 
     #[rstest]
     fn matches_ignoring_source() {
-        let (krates, metadata) = construct_krates_and_metadata();
-        let package = metadata.root_package().unwrap();
+        let (krates, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
+        let package: &krates::Package = metadata.root_package().unwrap();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let dependency = package.dependencies.clone().pop().unwrap();
 
         assert!(!dependency
             .matches_ignoring_source(&krates, &package.clone().id)
             .unwrap());
 
-        let dependency_package_id = krates
+        let dependency_package_id: krates::PackageId = krates
             .krates()
             .filter(|k| {
                 k.name == dependency.name && dependency.req.matches(&k.version)
@@ -267,14 +283,16 @@ mod metadata_tests {
 
     #[rstest]
     fn to_cargo_geiger_package_id_test() {
-        let (_, metadata) = construct_krates_and_metadata();
+        let (_, metadata): (krates::Krates, krates::Metadata) =
+            construct_krates_and_metadata();
 
-        let root_package = metadata.root_package().unwrap();
+        let root_package: &krates::Package = metadata.root_package().unwrap();
 
-        let cargo_geiger_package_id = root_package
-            .id
-            .to_cargo_geiger_package_id(&metadata)
-            .unwrap();
+        let cargo_geiger_package_id: cargo_geiger_serde::PackageId =
+            root_package
+                .id
+                .to_cargo_geiger_package_id(&metadata)
+                .unwrap();
 
         assert_eq!(cargo_geiger_package_id.name, root_package.name);
 
@@ -296,9 +314,12 @@ mod metadata_tests {
         gctx: &GlobalContext,
     ) -> (Package, PackageRegistry<'_>, Workspace<'_>) {
         let manifest_path: Option<PathBuf> = None;
-        let workspace = get_workspace(gctx, manifest_path).unwrap();
-        let package = workspace.current().unwrap().clone();
-        let registry = get_registry(gctx, &package).unwrap();
+        let workspace: cargo::core::Workspace<'_> =
+            get_workspace(gctx, manifest_path).unwrap();
+        let package: cargo::core::Package =
+            workspace.current().unwrap().clone();
+        let registry: cargo::core::registry::PackageRegistry<'_> =
+            get_registry(gctx, &package).unwrap();
 
         (package, registry, workspace)
     }
@@ -307,10 +328,11 @@ mod metadata_tests {
         gctx: &'a GlobalContext,
         package: &Package,
     ) -> CargoResult<PackageRegistry<'a>> {
-        let mut registry = PackageRegistry::new_with_source_config(
-            gctx,
-            SourceConfigMap::new(gctx).unwrap(),
-        )?;
+        let mut registry: cargo::core::registry::PackageRegistry<'_> =
+            PackageRegistry::new_with_source_config(
+                gctx,
+                SourceConfigMap::new(gctx).unwrap(),
+            )?;
         registry.add_sources(Some(package.package_id().source_id()))?;
         Ok(registry)
     }
@@ -321,20 +343,23 @@ mod metadata_tests {
         registry: &mut PackageRegistry<'cfg>,
         workspace: &'a Workspace<'cfg>,
     ) -> CargoResult<(PackageSet<'a>, Resolve)> {
-        let uses_default_features = !args.no_default_features;
+        let uses_default_features: bool = !args.no_default_features;
 
-        let cli_features = CliFeatures::from_command_line(
-            &args.features,
-            args.all_features,
-            uses_default_features,
-        )
-        .unwrap();
+        let cli_features: cargo::core::resolver::CliFeatures =
+            CliFeatures::from_command_line(
+                &args.features,
+                args.all_features,
+                uses_default_features,
+            )
+            .unwrap();
 
-        let prev = ops::load_pkg_lockfile(workspace)?;
-        let package_id_spec = PackageIdSpec::new(package_id.name().to_string())
-            .with_version(package_id.version().clone().into())
-            .with_url(package_id.source_id().url().clone());
-        let resolve = ops::resolve_with_previous(
+        let prev: std::option::Option<cargo::core::Resolve> =
+            ops::load_pkg_lockfile(workspace)?;
+        let package_id_spec: cargo::core::PackageIdSpec =
+            PackageIdSpec::new(package_id.name().to_string())
+                .with_version(package_id.version().clone().into())
+                .with_url(package_id.source_id().url().clone());
+        let resolve: cargo::core::Resolve = ops::resolve_with_previous(
             registry,
             workspace,
             &cli_features,
@@ -344,7 +369,7 @@ mod metadata_tests {
             &[package_id_spec],
             true,
         )?;
-        let packages = ops::get_resolved_packages(
+        let packages: cargo::core::PackageSet<'_> = ops::get_resolved_packages(
             &resolve,
             PackageRegistry::new_with_source_config(
                 workspace.gctx(),

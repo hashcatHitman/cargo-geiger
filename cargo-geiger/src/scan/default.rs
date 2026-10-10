@@ -56,10 +56,10 @@ fn build_compile_options<'a>(
     args: &'a FeaturesArgs,
     gctx: &'a GlobalContext,
 ) -> CompileOptions {
-    let mut compile_options =
+    let mut compile_options: cargo::ops::CompileOptions =
         CompileOptions::new(gctx, CompileMode::Check { test: false }).unwrap();
 
-    let uses_default_features = !args.no_default_features;
+    let uses_default_features: bool = !args.no_default_features;
 
     compile_options.cli_features = CliFeatures::from_command_line(
         &args.features,
@@ -97,13 +97,14 @@ fn scan(
     scan_parameters: &ScanParameters,
     workspace: &Workspace,
 ) -> Result<ScanDetails, CliError> {
-    let compile_options = build_compile_options(
+    let compile_options: cargo::ops::CompileOptions = build_compile_options(
         &scan_parameters.args.features_args,
         scan_parameters.gctx,
     );
 
     match resolve_rs_file_deps(&compile_options, workspace) {
         Ok(rs_files_used) => {
+            #[expect(clippy::undeclared_type, reason = "Borked!")]
             let geiger_context = find_unsafe(
                 cargo_metadata_parameters,
                 scan_parameters.gctx,
@@ -127,17 +128,19 @@ fn scan_to_report(
     scan_parameters: &ScanParameters,
     workspace: &Workspace,
 ) -> Result<ScanResult, CliError> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let ScanDetails {
         rs_files_used,
         geiger_context,
     } = scan(cargo_metadata_parameters, scan_parameters, workspace)?;
-    let mut report = SafetyReport::default();
+    let mut report: cargo_geiger_serde::SafetyReport = SafetyReport::default();
     for (package, package_metrics_option) in package_metrics(
         cargo_metadata_parameters,
         &geiger_context,
         graph,
         root_package_id,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let package_metrics = match package_metrics_option {
             Some(m) => m,
             None => {
@@ -145,8 +148,9 @@ fn scan_to_report(
                 continue;
             }
         };
-        let unsafe_info = unsafe_stats(&package_metrics, &rs_files_used);
-        let entry = ReportEntry {
+        let unsafe_info: cargo_geiger_serde::UnsafeInfo =
+            unsafe_stats(&package_metrics, &rs_files_used);
+        let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
             package,
             unsafety: unsafe_info,
         };
@@ -156,7 +160,7 @@ fn scan_to_report(
         list_files_used_but_not_scanned(&geiger_context, &rs_files_used)
             .into_iter()
             .collect();
-    let json_string = match output_format {
+    let json_string: std::string::String = match output_format {
         OutputFormat::Json => serde_json::to_string(&report).unwrap(),
         _ => panic!("Only implemented for OutputFormat::Json"),
     };
@@ -186,15 +190,17 @@ mod default_tests {
         )
     )]
     fn build_compile_options_test(input_features: Vec<String>) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = FeaturesArgs {
             all_features: rand::random(),
             features: input_features,
             no_default_features: rand::random(),
         };
 
-        let gctx = GlobalContext::default().unwrap();
-        let compile_options = build_compile_options(&args, &gctx);
-        let expected_cli_features =
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let compile_options: cargo::ops::CompileOptions =
+            build_compile_options(&args, &gctx);
+        let expected_cli_features: cargo::core::resolver::CliFeatures =
             CliFeatures::from_command_line(&args.features, false, false)
                 .unwrap();
 

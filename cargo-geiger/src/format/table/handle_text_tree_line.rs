@@ -35,10 +35,11 @@ pub fn text_tree_line_package_to_table_line_string(
     table_parameters: &TableParameters,
     tree_vines: String,
 ) -> Option<String> {
-    let package_is_new = handle_package_parameters
+    let package_is_new: bool = handle_package_parameters
         .visited_package_ids
         .insert(package_id.clone());
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let package_metrics = match table_parameters
         .geiger_context
         .package_id_to_metrics
@@ -51,7 +52,7 @@ pub fn text_tree_line_package_to_table_line_string(
             return None;
         }
     };
-    let unsafe_info =
+    let unsafe_info: cargo_geiger_serde::UnsafeInfo =
         unsafe_stats(package_metrics, table_parameters.rs_files_used);
     if package_is_new {
         handle_package_parameters
@@ -61,9 +62,10 @@ pub fn text_tree_line_package_to_table_line_string(
             .total_package_counts
             .total_unused_counter_block += unsafe_info.unused.clone();
     }
-    let unsafe_found = unsafe_info.used.has_unsafe();
-    let crate_forbids_unsafe = unsafe_info.forbids_unsafe;
-    let total_inc = package_is_new as i32;
+    let unsafe_found: bool = unsafe_info.used.has_unsafe();
+    let crate_forbids_unsafe: bool = unsafe_info.forbids_unsafe;
+    let total_inc: i32 = package_is_new as i32;
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let crate_detection_status =
         get_crate_detection_status_and_update_package_counts(
             crate_forbids_unsafe,
@@ -72,19 +74,20 @@ pub fn text_tree_line_package_to_table_line_string(
             unsafe_found,
         );
 
-    let icon = match crate_detection_status {
-        CrateDetectionStatus::NoneDetectedForbidsUnsafe => {
-            emoji_symbols.emoji(SymbolKind::Lock)
-        }
-        CrateDetectionStatus::NoneDetectedAllowsUnsafe => {
-            emoji_symbols.emoji(SymbolKind::QuestionMark)
-        }
-        CrateDetectionStatus::UnsafeDetected => {
-            emoji_symbols.emoji(SymbolKind::Rads)
-        }
-    };
+    let icon: std::boxed::Box<dyn std::fmt::Display> =
+        match crate_detection_status {
+            CrateDetectionStatus::NoneDetectedForbidsUnsafe => {
+                emoji_symbols.emoji(SymbolKind::Lock)
+            }
+            CrateDetectionStatus::NoneDetectedAllowsUnsafe => {
+                emoji_symbols.emoji(SymbolKind::QuestionMark)
+            }
+            CrateDetectionStatus::UnsafeDetected => {
+                emoji_symbols.emoji(SymbolKind::Rads)
+            }
+        };
 
-    let package_name = colorize(
+    let package_name: colored::ColoredString = colorize(
         &crate_detection_status,
         table_parameters.print_config.output_format,
         format!(
@@ -95,7 +98,7 @@ pub fn text_tree_line_package_to_table_line_string(
                 .display(cargo_metadata_parameters, &package_id)
         ),
     );
-    let unsafe_info = colorize(
+    let unsafe_info: colored::ColoredString = colorize(
         &crate_detection_status,
         table_parameters.print_config.output_format,
         table_row(
@@ -125,9 +128,9 @@ fn construct_package_text_tree_line(
     tree_vines: String,
     unsafe_info: ColoredString,
 ) -> String {
-    let shift_chars = unsafe_info.chars().count() + 4;
+    let shift_chars: usize = unsafe_info.chars().count() + 4;
 
-    let mut line = String::new();
+    let mut line: std::string::String = String::new();
     line.push_str(format!("{}  {: <2}", unsafe_info, icon).as_str());
 
     // Here comes some special control characters to position the cursor
@@ -216,8 +219,8 @@ mod handle_text_tree_line_tests {
         input_dep_kind: DependencyKind,
         expected_table_line_option: Option<String>,
     ) {
-        let tree_vines = String::from("tree_vines");
-        let actual_table_lines =
+        let tree_vines: std::string::String = String::from("tree_vines");
+        let actual_table_lines: std::option::Option<std::string::String> =
             text_tree_line_extra_deps_group_to_table_line_string(
                 input_dep_kind,
                 tree_vines,
@@ -250,9 +253,13 @@ mod handle_text_tree_line_tests {
         input_symbol_kind: SymbolKind,
         expected_package_text_tree_line: String,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let emoji_symbols = EmojiSymbols::new(input_output_format);
-        let icon = emoji_symbols.emoji(input_symbol_kind);
-        let package_name = String::from("package_name").normal();
+        let icon: std::boxed::Box<dyn std::fmt::Display> =
+            emoji_symbols.emoji(input_symbol_kind);
+        let package_name: colored::ColoredString =
+            String::from("package_name").normal();
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let table_parameters = TableParameters {
             geiger_context: &Default::default(),
             print_config: &PrintConfig {
@@ -261,18 +268,20 @@ mod handle_text_tree_line_tests {
             },
             rs_files_used: &Default::default(),
         };
-        let tree_vines = String::from("tree_vines");
-        let unsafe_info = ColoredString::from("unsafe_info").normal();
+        let tree_vines: std::string::String = String::from("tree_vines");
+        let unsafe_info: colored::ColoredString =
+            ColoredString::from("unsafe_info").normal();
 
-        let package_text_tree_line = construct_package_text_tree_line(
-            input_crate_detection_status,
-            &emoji_symbols,
-            icon,
-            package_name,
-            &table_parameters,
-            tree_vines,
-            unsafe_info,
-        );
+        let package_text_tree_line: std::string::String =
+            construct_package_text_tree_line(
+                input_crate_detection_status,
+                &emoji_symbols,
+                icon,
+                package_name,
+                &table_parameters,
+                tree_vines,
+                unsafe_info,
+            );
 
         assert_eq!(package_text_tree_line, expected_package_text_tree_line);
     }
@@ -333,6 +342,7 @@ mod handle_text_tree_line_tests {
         expected_none_detected_allows_unsafe: i32,
         expected_unsafe_detected: i32,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut handle_package_parameters = HandlePackageParameters {
             total_package_counts: &mut TotalPackageCounts {
                 none_detected_forbids_unsafe: 0,
@@ -345,6 +355,7 @@ mod handle_text_tree_line_tests {
             warning_count: &mut 0,
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let crate_detection_status =
             get_crate_detection_status_and_update_package_counts(
                 input_crate_forbids_unsafe,

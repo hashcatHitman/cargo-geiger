@@ -170,8 +170,10 @@ mod mapping_tests {
         input_package_path_option: Option<&Path>,
         expected_package_path_buf_option: Option<PathBuf>,
     ) {
-        let _mock_package_parent = input_package_path_option;
+        let _mock_package_parent: std::option::Option<&std::path::Path> =
+            input_package_path_option;
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mock_package = MockPackage {
             mock_package_name: String::from("package_name"),
             mock_package_parent: input_package_path_option,

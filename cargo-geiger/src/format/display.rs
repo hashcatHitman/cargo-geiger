@@ -88,18 +88,20 @@ pub mod display_tests {
         input_pattern: Pattern,
         expected_formatted_string: &str,
     ) {
-        let metadata = MetadataCommand::new()
+        let metadata: krates::Metadata = MetadataCommand::new()
             .manifest_path("./Cargo.toml")
             .features(CargoOpt::AllFeatures)
             .exec()
             .unwrap();
 
-        let krates = KratesBuilder::new()
+        let krates: krates::Krates = KratesBuilder::new()
             .build_with_metadata(metadata.clone(), |_| ())
             .unwrap();
 
-        let package_id = metadata.root_package().unwrap().id.clone();
+        let package_id: krates::PackageId =
+            metadata.root_package().unwrap().id.clone();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let display = Display {
             cargo_metadata_parameters: &CargoMetadataParameters {
                 krates: &krates,

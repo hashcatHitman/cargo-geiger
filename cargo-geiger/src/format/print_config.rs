@@ -45,13 +45,14 @@ pub struct PrintConfig {
 impl PrintConfig {
     pub fn new(args: &Args) -> Result<Self, CliError> {
         // TODO: Add command line flag for this and make it default to false?
-        let allow_partial_results = true;
+        let allow_partial_results: bool = true;
 
-        let direction = match args.invert {
+        let direction: petgraph::Direction = match args.invert {
             true => EdgeDirection::Incoming,
             false => EdgeDirection::Outgoing,
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let format = Pattern::try_build(&args.format).map_err(|e| {
             CliError::new(
                 (FormatError {
@@ -62,11 +63,12 @@ impl PrintConfig {
             )
         })?;
 
-        let include_tests = match args.include_tests {
+        let include_tests: geiger::IncludeTests = match args.include_tests {
             true => IncludeTests::Yes,
             false => IncludeTests::No,
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let prefix = match (args.prefix_depth, args.no_indent) {
             (true, _) => Prefix::Depth,
             (false, true) => Prefix::None,
@@ -134,11 +136,13 @@ mod print_config_tests {
         input_invert_bool: bool,
         expected_edge_direction: EdgeDirection,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             invert: input_invert_bool,
             ..Default::default()
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config_result = PrintConfig::new(&args);
 
         assert!(print_config_result.is_ok());
@@ -173,11 +177,13 @@ mod print_config_tests {
         input_format_string: String,
         expected_format: Pattern,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             format: input_format_string,
             ..Default::default()
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config_result = PrintConfig::new(&args);
 
         assert!(print_config_result.is_ok());
@@ -194,11 +200,13 @@ mod print_config_tests {
         input_include_tests_bool: bool,
         expected_include_tests: IncludeTests,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             include_tests: input_include_tests_bool,
             ..Default::default()
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config_result = PrintConfig::new(&args);
 
         assert!(print_config_result.is_ok());
@@ -222,12 +230,14 @@ mod print_config_tests {
         input_no_indent_bool: bool,
         expected_output_prefix: Prefix,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args {
             no_indent: input_no_indent_bool,
             prefix_depth: input_prefix_depth_bool,
             ..Default::default()
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config_result = PrintConfig::new(&args);
 
         assert!(print_config_result.is_ok());
@@ -247,6 +257,7 @@ mod print_config_tests {
         input_raw_str: &str,
         expected_output_format_result: Result<OutputFormat, strum::ParseError>,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let output_format = OutputFormat::from_str(input_raw_str);
         assert_eq!(output_format, expected_output_format_result);
     }
@@ -291,7 +302,7 @@ mod print_config_tests {
         input_output_format: OutputFormat,
         expected_colored_string: ColoredString,
     ) {
-        let string_value = String::from("string_value");
+        let string_value: std::string::String = String::from("string_value");
 
         assert_eq!(
             colorize(

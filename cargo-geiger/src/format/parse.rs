@@ -30,7 +30,7 @@ impl<'a> Parser<'a> {
     }
 
     fn name(&mut self) -> &'a str {
-        let start = match self.it.peek() {
+        let start: usize = match self.it.peek() {
             Some(&(pos, ch)) if ch.is_alphabetic() => {
                 self.it.next();
                 pos
@@ -72,6 +72,7 @@ impl<'a> Iterator for Parser<'a> {
                 if self.consume('{') {
                     Some(RawChunk::Text("{"))
                 } else {
+                    #[expect(clippy::undeclared_type, reason = "Borked!")]
                     let chunk = self.argument();
                     if self.consume('}') {
                         Some(chunk)
@@ -99,14 +100,17 @@ pub mod parse_tests {
 
     #[rstest]
     fn parser_new_test() {
-        let parser_s = "parser_string";
+        let parser_s: &str = "parser_string";
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let parser = Parser::new(parser_s);
         assert_eq!(parser.s, parser_s);
     }
 
     #[rstest]
     fn parser_argument_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut parser = Parser::new("parser 1.2.3");
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let raw_chunk = parser.argument();
         assert_eq!(raw_chunk, RawChunk::Argument("parser"));
     }
@@ -118,13 +122,15 @@ pub mod parse_tests {
         case("1.2.3 parser", "")
     )]
     fn parser_name_test(input_s_string: &str, expected_name_string: &str) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut parser = Parser::new(input_s_string);
         assert_eq!(parser.name(), expected_name_string)
     }
 
     #[rstest]
     fn parser_text_test() {
-        let parser_s = "parser 1.2.3";
+        let parser_s: &str = "parser 1.2.3";
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut parser = Parser::new(parser_s);
         assert_eq!(parser.text(0), RawChunk::Text(parser_s));
     }

@@ -133,8 +133,8 @@ pub fn is_file_with_ext(entry: &DirEntry, file_ext: &str) -> bool {
     if !entry.file_type().is_file() {
         return false;
     }
-    let p = entry.path();
-    let ext = match p.extension() {
+    let p: &std::path::Path = entry.path();
+    let ext: &std::ffi::OsStr = match p.extension() {
         Some(e) => e,
         None => return false,
     };
@@ -150,17 +150,18 @@ pub fn resolve_rs_file_deps(
     compile_options: &CompileOptions,
     workspace: &Workspace,
 ) -> Result<HashSet<PathBuf>, RsResolveError> {
-    let gctx = workspace.gctx();
-    let (pkg_set, _) = ops::resolve_ws(workspace, false)
-        .map_err(|e| RsResolveError::Cargo(e.to_string()))?;
-    let packages = pkg_set
+    let gctx: &cargo::GlobalContext = workspace.gctx();
+    let (pkg_set, _): (cargo::core::PackageSet<'_>, cargo::core::Resolve) =
+        ops::resolve_ws(workspace, false)
+            .map_err(|e| RsResolveError::Cargo(e.to_string()))?;
+    let packages: std::vec::Vec<std::string::String> = pkg_set
         .package_ids()
         .map(|package_id| package_id.name().as_str().to_owned())
         .collect();
     // Need to run a cargo clean to identify all new .d deps files.
     // TODO: Figure out how this can be avoided to improve performance, clean
     // Rust builds are __slow__.
-    let clean_options = CleanOptions {
+    let clean_options: cargo::ops::CleanOptions<'_> = CleanOptions {
         gctx,
         spec: packages,
         targets: vec![],
@@ -175,19 +176,26 @@ pub fn resolve_rs_file_deps(
     ops::clean(workspace, &clean_options)
         .map_err(|e| RsResolveError::Cargo(e.to_string()))?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let inner_arc = Arc::new(Mutex::new(CustomExecutorInnerContext::default()));
     {
         compile_with_exec(compile_options, gctx, inner_arc.clone(), workspace)?;
     }
 
-    let workspace_root = workspace.root().to_path_buf();
+    let workspace_root: std::path::PathBuf = workspace.root().to_path_buf();
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let inner_mutex =
         Arc::try_unwrap(inner_arc).map_err(|_| RsResolveError::ArcUnwrap())?;
-    let (rs_files, out_dir_args) = {
+    let (rs_files, out_dir_args): (
+        std::collections::HashSet<std::path::PathBuf>,
+        std::collections::HashSet<std::path::PathBuf>,
+    ) = {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let ctx = inner_mutex.into_inner()?;
         (ctx.rs_file_args, ctx.out_dir_args)
     };
-    let mut path_buf_hash_set = HashSet::<PathBuf>::new();
+    let mut path_buf_hash_set: std::collections::HashSet<std::path::PathBuf> =
+        HashSet::<PathBuf>::new();
     for out_dir in out_dir_args {
         // TODO: Figure out if the `.d` dep files are used by one or more rustc
         // calls. It could be useful to know which `.d` dep files belong to
@@ -213,11 +221,15 @@ fn add_dir_entries_to_path_buf_hash_set(
     workspace_root: PathBuf,
 ) -> Result<(), RsResolveError> {
     for entry in WalkDir::new(&out_dir) {
-        let entry = entry.map_err(RsResolveError::Walkdir)?;
+        let entry: walkdir::DirEntry =
+            entry.map_err(RsResolveError::Walkdir)?;
         if !is_file_with_ext(&entry, "d") {
             continue;
         }
-        let dependencies = parse_rustc_dep_info(entry.path()).map_err(|e| {
+        let dependencies: std::vec::Vec<(
+            std::string::String,
+            std::vec::Vec<std::string::String>,
+        )> = parse_rustc_dep_info(entry.path()).map_err(|e| {
             RsResolveError::DepParse(e.to_string(), entry.path().to_path_buf())
         })?;
         let canonical_paths = dependencies
@@ -240,6 +252,7 @@ fn compile_with_exec(
     inner_arc: Arc<Mutex<CustomExecutorInnerContext>>,
     workspace: &Workspace,
 ) -> Result<(), RsResolveError> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let custom_executor = CustomExecutor {
         cwd: gctx.cwd().to_path_buf(),
         inner_ctx: inner_arc,
@@ -260,16 +273,17 @@ fn compile_with_exec(
 fn parse_rustc_dep_info(
     rustc_dep_info: &Path,
 ) -> CargoResult<Vec<(String, Vec<String>)>> {
-    let contents = paths::read(rustc_dep_info)?;
+    let contents: std::string::String = paths::read(rustc_dep_info)?;
     contents
         .lines()
         .filter_map(|l| l.find(": ").map(|i| (l, i)))
         .map(|(line, pos)| {
-            let target = &line[..pos];
-            let mut deps = line[pos + 2..].split_whitespace();
-            let mut ret = Vec::new();
+            let target: &str = &line[..pos];
+            let mut deps: std::str::SplitWhitespace<'_> =
+                line[pos + 2..].split_whitespace();
+            let mut ret: std::vec::Vec<std::string::String> = Vec::new();
             while let Some(s) = deps.next() {
-                let mut file = s.to_string();
+                let mut file: std::string::String = s.to_string();
                 while file.ends_with('\\') {
                     file.pop();
                     file.push(' ');
@@ -305,7 +319,7 @@ mod rs_file_tests {
         input_rs_file: RsFile,
         expected_is_entry_point: bool,
     ) {
-        let (is_entry_point, _path_buf) =
+        let (is_entry_point, _path_buf): (bool, std::path::PathBuf) =
             into_is_entry_point_and_path_buf(input_rs_file);
         assert_eq!(is_entry_point, expected_is_entry_point);
         assert_eq!(_path_buf, PathBuf::from("test.txt"));
@@ -361,7 +375,8 @@ mod rs_file_tests {
         input_target_kind: TargetKind,
         expected_rs_file: RsFile,
     ) {
-        let path_buf = Path::new("test_path.ext").to_path_buf();
+        let path_buf: std::path::PathBuf =
+            Path::new("test_path.ext").to_path_buf();
 
         assert_eq!(
             into_rs_code_file(&input_target_kind, path_buf),
@@ -414,8 +429,8 @@ mod rs_file_tests {
 
     #[rstest]
     fn is_file_with_ext_test() {
-        let gctx = GlobalContext::default().unwrap();
-        let cwd = gctx.cwd();
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let cwd: &std::path::Path = gctx.cwd();
 
         let walk_dir_rust_files = WalkDir::new(cwd)
             .into_iter()

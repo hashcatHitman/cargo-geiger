@@ -32,9 +32,11 @@ pub fn walk_dependency_tree(
     print_config: &PrintConfig,
     root_package_id: PackageId,
 ) -> Vec<TextTreeLine> {
-    let mut visited_deps = HashSet::new();
-    let mut levels_continue = vec![];
+    let mut visited_deps: std::collections::HashSet<krates::PackageId> =
+        HashSet::new();
+    let mut levels_continue: std::vec::Vec<bool> = vec![];
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut walk_dependency_parameters = WalkDependencyParameters {
         graph,
         levels_continue: &mut levels_continue,
@@ -42,7 +44,7 @@ pub fn walk_dependency_tree(
         visited_deps: &mut visited_deps,
     };
 
-    let node = &graph.graph[graph.nodes[&root_package_id]];
+    let node: &krates::PackageId = &graph.graph[graph.nodes[&root_package_id]];
     walk_dependency_node(
         cargo_metadata_parameters,
         node,

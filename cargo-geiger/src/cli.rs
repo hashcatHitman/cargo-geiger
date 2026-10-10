@@ -24,11 +24,13 @@ pub fn get_cargo_metadata(
     args: &Args,
     config: &GlobalContext,
 ) -> CargoResult<krates::cm::Metadata> {
-    let root_manifest_path = match args.manifest_path.clone() {
-        Some(path) => path,
-        None => important_paths::find_root_manifest_for_wd(config.cwd())?,
-    };
+    let root_manifest_path: std::path::PathBuf =
+        match args.manifest_path.clone() {
+            Some(path) => path,
+            None => important_paths::find_root_manifest_for_wd(config.cwd())?,
+        };
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut metadata_command = MetadataCommand::new();
     metadata_command.manifest_path(root_manifest_path);
 
@@ -57,17 +59,18 @@ pub fn get_cfgs(
     global_rustc_path: &PathBuf,
     target: &Option<String>,
 ) -> CargoResult<Option<Vec<Cfg>>> {
-    let mut process = cargo_util::ProcessBuilder::new(global_rustc_path);
+    let mut process: cargo_util::ProcessBuilder =
+        cargo_util::ProcessBuilder::new(global_rustc_path);
     process.arg("--print=cfg").env_remove("RUST_LOG");
     if let Some(ref s) = *target {
         process.arg("--target").arg(s);
     }
-    let output = match process.exec_with_output() {
+    let output: std::process::Output = match process.exec_with_output() {
         Ok(output) => output,
         Err(_) => return Ok(None),
     };
-    let output = str::from_utf8(&output.stdout).unwrap();
-    let lines = output.lines();
+    let output: &str = str::from_utf8(&output.stdout).unwrap();
+    let lines: std::str::Lines<'_> = output.lines();
     Ok(Some(
         lines
             .map(|s| Cfg::from_str(s).map_err(|e| e.into()))
@@ -86,7 +89,7 @@ pub fn get_workspace(
     gctx: &GlobalContext,
     manifest_path: Option<PathBuf>,
 ) -> CargoResult<Workspace<'_>> {
-    let root = match manifest_path {
+    let root: std::path::PathBuf = match manifest_path {
         Some(path) => path,
         None => important_paths::find_root_manifest_for_wd(gctx.cwd())?,
     };
@@ -102,30 +105,42 @@ mod cli_tests {
 
     #[rstest]
     fn get_cargo_metadata_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args::default();
-        let gctx = GlobalContext::default().unwrap();
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
 
-        let cargo_metadata_result = get_cargo_metadata(&args, &gctx);
+        let cargo_metadata_result: std::result::Result<
+            krates::Metadata,
+            anyhow::Error,
+        > = get_cargo_metadata(&args, &gctx);
 
         assert!(cargo_metadata_result.is_ok());
     }
 
     #[rstest]
     fn get_cfgs_test() {
-        let gctx = GlobalContext::default().unwrap();
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
         let target: Option<String> = None;
-        let root =
+        let root: std::path::PathBuf =
             important_paths::find_root_manifest_for_wd(gctx.cwd()).unwrap();
-        let workspace = Workspace::new(&root, &gctx).unwrap();
+        let workspace: cargo::core::Workspace<'_> =
+            Workspace::new(&root, &gctx).unwrap();
 
-        let global_rustc = gctx.load_global_rustc(Some(&workspace)).unwrap();
+        let global_rustc: cargo::util::Rustc =
+            gctx.load_global_rustc(Some(&workspace)).unwrap();
 
-        let cfgs = get_cfgs(&global_rustc.path, &target);
+        let cfgs: std::result::Result<
+            std::option::Option<std::vec::Vec<cargo_platform::Cfg>>,
+            anyhow::Error,
+        > = get_cfgs(&global_rustc.path, &target);
 
         assert!(cfgs.is_ok());
-        let cfg_vec_option = cfgs.unwrap();
+        let cfg_vec_option: std::option::Option<
+            std::vec::Vec<cargo_platform::Cfg>,
+        > = cfgs.unwrap();
         assert!(cfg_vec_option.is_some());
-        let cfg_vec = cfg_vec_option.unwrap();
+        let cfg_vec: std::vec::Vec<cargo_platform::Cfg> =
+            cfg_vec_option.unwrap();
 
         let mut names =
             cfg_vec.iter().filter(|cfg| matches!(cfg, Cfg::Name(_)));
@@ -140,26 +155,36 @@ mod cli_tests {
 
     #[rstest]
     fn get_krates_test() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let args = Args::default();
-        let gctx = GlobalContext::default().unwrap();
-        let cargo_metadata = get_cargo_metadata(&args, &gctx).unwrap();
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
+        let cargo_metadata: krates::Metadata =
+            get_cargo_metadata(&args, &gctx).unwrap();
 
-        let krates_result = get_krates(&cargo_metadata);
+        let krates_result: std::result::Result<krates::Krates, anyhow::Error> =
+            get_krates(&cargo_metadata);
         assert!(krates_result.is_ok());
     }
 
     #[rstest]
     fn get_workspace_test() {
-        let gctx = GlobalContext::default().unwrap();
+        let gctx: cargo::GlobalContext = GlobalContext::default().unwrap();
         let manifest_path: Option<PathBuf> = None;
 
-        let workspace_cargo_result = get_workspace(&gctx, manifest_path);
+        let workspace_cargo_result: std::result::Result<
+            cargo::core::Workspace<'_>,
+            anyhow::Error,
+        > = get_workspace(&gctx, manifest_path);
         assert!(workspace_cargo_result.is_ok());
-        let workspace = workspace_cargo_result.unwrap();
+        let workspace: cargo::core::Workspace<'_> =
+            workspace_cargo_result.unwrap();
 
-        let package_result = workspace.current();
+        let package_result: std::result::Result<
+            &cargo::core::Package,
+            anyhow::Error,
+        > = workspace.current();
         assert!(package_result.is_ok());
-        let package = package_result.unwrap();
+        let package: &cargo::core::Package = package_result.unwrap();
 
         assert_eq!(package.package_id().name(), "cargo-geiger");
     }

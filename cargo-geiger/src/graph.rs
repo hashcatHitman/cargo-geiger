@@ -33,13 +33,16 @@ pub fn build_graph<'a>(
     global_rustc_path: &'a PathBuf,
     root_package_id: PackageId,
 ) -> CargoResult<Graph> {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let (extra_deps, target) = build_graph_prerequisites(
         config_host,
         &args.deps_args,
         &args.target_args,
     );
-    let cfgs = get_cfgs(global_rustc_path, &args.target_args.target)?;
+    let cfgs: std::option::Option<std::vec::Vec<cargo_platform::Cfg>> =
+        get_cfgs(global_rustc_path, &args.target_args.target)?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut graph = Graph {
         graph: petgraph::Graph::new(),
         nodes: HashMap::new(),
@@ -49,8 +52,10 @@ pub fn build_graph<'a>(
         graph.graph.add_node(root_package_id.clone()),
     );
 
-    let mut pending_packages = vec![root_package_id.clone()];
+    let mut pending_packages: std::vec::Vec<krates::PackageId> =
+        vec![root_package_id.clone()];
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let graph_configuration = GraphConfiguration {
         target,
         cfgs: cfgs.as_deref(),
@@ -58,7 +63,7 @@ pub fn build_graph<'a>(
     };
 
     while let Some(package_id) = pending_packages.pop() {
-        let is_root_package = package_id == root_package_id;
+        let is_root_package: bool = package_id == root_package_id;
         add_package_dependencies_to_graph(
             cargo_metadata_parameters,
             package_id,
@@ -85,7 +90,7 @@ fn add_graph_node_if_not_present_and_edge(
     index: NodeIndex,
     pending_packages: &mut Vec<PackageId>,
 ) {
-    let dependency_index =
+    let dependency_index: petgraph::prelude::NodeIndex =
         match graph.nodes.entry(dependency_package_id.clone()) {
             Entry::Occupied(e) => *e.get(),
             Entry::Vacant(e) => {
@@ -106,12 +111,14 @@ fn add_package_dependencies_to_graph(
     pending_packages: &mut Vec<PackageId>,
     is_root_package: bool,
 ) {
-    let index = graph.nodes[&package_id];
+    let index: petgraph::prelude::NodeIndex = graph.nodes[&package_id];
     let kid: Kid = package_id.clone().into();
 
-    let krates_node_option =
-        cargo_metadata_parameters.krates.node_for_kid(&kid);
+    let krates_node_option: std::option::Option<
+        &krates::Node<krates::Package>,
+    > = cargo_metadata_parameters.krates.node_for_kid(&kid);
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let dep_not_replaced_option = cargo_metadata_parameters
         .metadata
         .deps_not_replaced(&package_id, is_root_package);
@@ -119,6 +126,7 @@ fn add_package_dependencies_to_graph(
     match (krates_node_option, dep_not_replaced_option) {
         (Some(Node::Krate { krate, .. }), Some(dependencies)) => {
             for (dependency_package_id, _) in dependencies {
+                #[expect(clippy::undeclared_type, reason = "Borked!")]
                 let dependency_iterator = filter_dependencies(
                     cargo_metadata_parameters,
                     &dependency_package_id,
@@ -148,6 +156,7 @@ fn build_graph_prerequisites<'a>(
     deps_args: &'a DepsArgs,
     target_args: &'a TargetArgs,
 ) -> (ExtraDeps, Option<&'a str>) {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let extra_deps = if deps_args.all_deps {
         ExtraDeps::All
     } else if deps_args.build_deps {
@@ -158,7 +167,7 @@ fn build_graph_prerequisites<'a>(
         ExtraDeps::NoMore
     };
 
-    let target = if target_args.all_targets {
+    let target: std::option::Option<&str> = if target_args.all_targets {
         None
     } else {
         Some(target_args.target.as_deref().unwrap_or(config_host))
@@ -245,9 +254,11 @@ mod graph_tests {
         input_deps_args: DepsArgs,
         expected_extra_deps: ExtraDeps,
     ) {
-        let config_host = "config_host";
+        let config_host: &str = "config_host";
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let target_args = TargetArgs::default();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let (extra_deps, _) = build_graph_prerequisites(
             config_host,
             &input_deps_args,
@@ -285,9 +296,11 @@ mod graph_tests {
         input_target_args: TargetArgs,
         expected_target: Option<&str>,
     ) {
-        let config_host = "default_config_host";
+        let config_host: &str = "default_config_host";
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let deps_args = DepsArgs::default();
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let (_, target) = build_graph_prerequisites(
             config_host,
             &deps_args,

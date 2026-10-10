@@ -17,15 +17,16 @@ pub fn walk_dependency_node(
     package: &PackageId,
     walk_dependency_parameters: &mut WalkDependencyParameters,
 ) -> Vec<TextTreeLine> {
-    let new = walk_dependency_parameters.print_config.all
+    let new: bool = walk_dependency_parameters.print_config.all
         || walk_dependency_parameters
             .visited_deps
             .insert(package.clone());
-    let tree_vines = construct_tree_vines_string(
+    let tree_vines: std::string::String = construct_tree_vines_string(
         walk_dependency_parameters.levels_continue,
         walk_dependency_parameters.print_config,
     );
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut all_out_text_tree_lines = vec![TextTreeLine::Package {
         id: package.clone(),
         tree_vines,
@@ -35,6 +36,7 @@ pub fn walk_dependency_node(
         return all_out_text_tree_lines;
     }
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut dependency_type_nodes = construct_dependency_type_nodes_hashmap(
         walk_dependency_parameters.graph,
         package,
@@ -42,6 +44,7 @@ pub fn walk_dependency_node(
     );
 
     for (dependency_kind, nodes) in dependency_type_nodes.iter_mut() {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut dep_kind_out = walk_dependency_kind(
             cargo_metadata_parameters,
             *dependency_kind,
@@ -73,7 +76,7 @@ fn construct_dependency_type_nodes_hashmap(
         .graph
         .edges_directed(graph.nodes[package], print_config.direction)
     {
-        let dependency = match print_config.direction {
+        let dependency: &krates::PackageId = match print_config.direction {
             EdgeDirection::Incoming => &graph.graph[edge.source()],
             EdgeDirection::Outgoing => &graph.graph[edge.target()],
         };
@@ -141,11 +144,17 @@ mod dependency_node_tests {
         expected_development_nodes_length: usize,
         expected_normal_nodes_length: usize,
     ) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let mut inner_graph =
             petgraph::Graph::<PackageId, DependencyKind>::new();
-        let mut nodes = HashMap::<PackageId, NodeIndex>::new();
+        let mut nodes: std::collections::HashMap<
+            krates::PackageId,
+            petgraph::prelude::NodeIndex,
+        > = HashMap::<PackageId, NodeIndex>::new();
 
-        let package_ids = create_cargo_metadata_package_id_vec(7);
+        let package_ids: std::vec::Vec<krates::PackageId> =
+            create_cargo_metadata_package_id_vec(7);
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let print_config = create_print_config(input_edge_direction);
 
         for package_id in &package_ids {
@@ -162,11 +171,13 @@ mod dependency_node_tests {
             &package_ids,
         );
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let graph = Graph {
             graph: inner_graph,
             nodes,
         };
 
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let dependency_type_nodes_hashmap =
             construct_dependency_type_nodes_hashmap(
                 &graph,

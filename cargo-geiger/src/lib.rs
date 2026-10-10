@@ -27,13 +27,13 @@ mod lib_tests {
     use krates::Krates;
 
     pub fn construct_krates_and_metadata() -> (Krates, Metadata) {
-        let metadata = MetadataCommand::new()
+        let metadata: krates::Metadata = MetadataCommand::new()
             .manifest_path("./Cargo.toml")
             .features(CargoOpt::AllFeatures)
             .exec()
             .unwrap();
 
-        let krates = KratesBuilder::new()
+        let krates: krates::Krates = KratesBuilder::new()
             .build_with_metadata(metadata.clone(), |_| ())
             .unwrap();
 

@@ -12,7 +12,7 @@ impl ToCargoGeigerSource for CargoMetadataPackageId {
         &self,
         metadata: &Metadata,
     ) -> CargoGeigerSerdeSource {
-        let package = self.to_cargo_metadata_package(metadata).unwrap();
+        let package: krates::Package = self.to_cargo_metadata_package(metadata).unwrap();
 
         match package.source {
             Some(source) => handle_source_repr(&source.repr),
@@ -22,9 +22,9 @@ impl ToCargoGeigerSource for CargoMetadataPackageId {
 }
 
 fn handle_source_repr(source_repr: &str) -> CargoGeigerSerdeSource {
-    let mut source_repr_vec = source_repr.split('+').collect::<Vec<&str>>();
+    let mut source_repr_vec: std::vec::Vec<&str> = source_repr.split('+').collect::<Vec<&str>>();
 
-    let source_type = source_repr_vec[0];
+    let source_type: &str = source_repr_vec[0];
 
     match SourceType::from(source_type) {
         SourceType::Registry => {
@@ -35,15 +35,15 @@ fn handle_source_repr(source_repr: &str) -> CargoGeigerSerdeSource {
             }
         }
         SourceType::Git => {
-            let raw_git_representation = source_repr_vec.pop().unwrap();
-            let raw_git_url = Url::parse(raw_git_representation).unwrap();
-            let git_url_without_query = format!(
+            let raw_git_representation: &str = source_repr_vec.pop().unwrap();
+            let raw_git_url: url::Url = Url::parse(raw_git_representation).unwrap();
+            let git_url_without_query: std::string::String = format!(
                 "{}://{}{}",
                 raw_git_url.scheme(),
                 raw_git_url.host_str().unwrap(),
                 raw_git_url.path()
             );
-            let revision = raw_git_url
+            let revision: std::string::String = raw_git_url
                 .query_pairs()
                 .find(|(query_key, _)| query_key == "rev")
                 .map(|(_, rev)| String::from(rev))
@@ -63,15 +63,15 @@ fn handle_source_repr(source_repr: &str) -> CargoGeigerSerdeSource {
 fn handle_path_source<T: GetPackageIdRepr>(
     package_id: &T,
 ) -> CargoGeigerSerdeSource {
-    let raw_repr = package_id.get_package_id_repr();
-    let raw_path_repr = raw_repr[1..raw_repr.len() - 1]
+    let raw_repr: std::string::String = package_id.get_package_id_repr();
+    let raw_path_repr: &str = raw_repr[1..raw_repr.len() - 1]
         .split("+file://")
         .skip(1)
         .collect::<Vec<&str>>()
         .pop()
         .unwrap();
 
-    let source_url = if cfg!(windows) {
+    let source_url: url::Url = if cfg!(windows) {
         Url::from_file_path(&raw_path_repr[1..]).unwrap()
     } else {
         Url::from_file_path(raw_path_repr).unwrap()
@@ -132,25 +132,25 @@ mod geiger_tests {
         input_source_repr: &str,
         expected_source: CargoGeigerSerdeSource,
     ) {
-        let source = handle_source_repr(input_source_repr);
+        let source: cargo_geiger_serde::Source = handle_source_repr(input_source_repr);
         assert_eq!(source, expected_source);
     }
 
     #[rstest]
     fn handle_path_source_test() {
         if !cfg!(windows) {
-            let package_id = CargoMetadataPackageId {
+            let package_id: krates::PackageId = CargoMetadataPackageId {
                 repr: String::from("(path+file:///cargo_geiger/test_crates/test1_package_with_no_deps)"),
             };
 
-            let expected_source = CargoGeigerSerdeSource::Path(
+            let expected_source: cargo_geiger_serde::Source = CargoGeigerSerdeSource::Path(
                 Url::from_file_path(
                     "/cargo_geiger/test_crates/test1_package_with_no_deps",
                 )
                 .unwrap(),
             );
 
-            let source = handle_path_source(&package_id);
+            let source: cargo_geiger_serde::Source = handle_path_source(&package_id);
             assert_eq!(source, expected_source);
         }
     }
