@@ -113,7 +113,7 @@ impl IntegrationTest for Test2 {
     const NAME: &'static str = "test2_package_with_shallow_deps";
 
     fn expected_report(&self, cx: &Context) -> SafetyReport {
-        let mut report =
+        let mut report: cargo_geiger_serde::SafetyReport =
             single_entry_safety_report(self.expected_report_entry(cx));
         merge_test_reports(&mut report, Test1.expected_report(cx));
         merge_test_reports(
@@ -156,7 +156,7 @@ impl IntegrationTest for Test3 {
     const NAME: &'static str = "test3_package_with_nested_deps";
 
     fn expected_report(&self, cx: &Context) -> SafetyReport {
-        let mut report =
+        let mut report: cargo_geiger_serde::SafetyReport =
             single_entry_safety_report(self.expected_report_entry(cx));
         merge_test_reports(
             &mut report,
@@ -204,7 +204,7 @@ impl IntegrationTest for Test4 {
     const NAME: &'static str = "test4_workspace_with_top_level_package";
 
     fn expected_report(&self, cx: &Context) -> SafetyReport {
-        let mut report =
+        let mut report: cargo_geiger_serde::SafetyReport =
             single_entry_safety_report(self.expected_report_entry(cx));
         merge_test_reports(&mut report, Test1.expected_report(cx));
         report
@@ -251,7 +251,7 @@ impl IntegrationTest for Test6 {
     const NAME: &'static str = "test6_cargo_lock_out_of_date";
 
     fn expected_report(&self, cx: &Context) -> SafetyReport {
-        let mut report =
+        let mut report: cargo_geiger_serde::SafetyReport =
             single_entry_safety_report(self.expected_report_entry(cx));
         merge_test_reports(
             &mut report,
@@ -298,7 +298,7 @@ impl IntegrationTest for Test7 {
     const NAME: &'static str = "test7_package_with_patched_dep";
 
     fn expected_report(&self, cx: &Context) -> SafetyReport {
-        let mut report =
+        let mut report: cargo_geiger_serde::SafetyReport =
             single_entry_safety_report(self.expected_report_entry(cx));
         merge_test_reports(
             &mut report,
@@ -346,7 +346,7 @@ trait WorkspaceCrateDir {
 
 impl WorkspaceCrateDir for Context {
     fn workspace_crate_dir(&self, workspace: &str, name: &str) -> PathBuf {
-        let mut p = self.path.clone();
+        let mut p: std::path::PathBuf = self.path.clone();
         p.extend(&[workspace, name]);
         p
     }

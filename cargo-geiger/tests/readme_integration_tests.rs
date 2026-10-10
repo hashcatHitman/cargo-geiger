@@ -57,13 +57,18 @@ fn test_package_update_readme(
     input_arg_vec: Vec<&str>,
     input_readme_filename: &str,
 ) {
-    let (_, context) = run_geiger_with(input_crate_name, input_arg_vec);
+    let (_, context): (std::process::Output, context::Context) =
+        run_geiger_with(input_crate_name, input_arg_vec);
 
-    let readme_snapshot_filename = format!("{}.readme", input_crate_name);
+    let readme_snapshot_filename: std::string::String =
+        format!("{}.readme", input_crate_name);
 
-    let crate_location = context.crate_dir(input_crate_name);
-    let readme_location = crate_location.join(input_readme_filename);
+    let crate_location: std::path::PathBuf =
+        context.crate_dir(input_crate_name);
+    let readme_location: std::path::PathBuf =
+        crate_location.join(input_readme_filename);
 
-    let readme_content = read_to_string(readme_location).unwrap();
+    let readme_content: std::string::String =
+        read_to_string(readme_location).unwrap();
     assert_snapshot!(readme_snapshot_filename, readme_content);
 }

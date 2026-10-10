@@ -16,17 +16,19 @@ pub trait IntegrationTest {
     }
 
     fn run(&self) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let (output, cx) = run_geiger_json(Self::NAME);
         assert!(output.status.success());
-        let actual =
+        let actual: cargo_geiger_serde::SafetyReport =
             serde_json::from_slice::<SafetyReport>(&output.stdout).unwrap();
         assert_eq!(actual, self.expected_report(&cx));
     }
 
     fn run_quick(&self) {
+        #[expect(clippy::undeclared_type, reason = "Borked!")]
         let (output, cx) = run_geiger_json_quick(Self::NAME);
         assert!(output.status.success());
-        let actual =
+        let actual: cargo_geiger_serde::QuickSafetyReport =
             serde_json::from_slice::<QuickSafetyReport>(&output.stdout)
                 .unwrap();
         assert_eq!(actual, self.expected_quick_report(&cx));

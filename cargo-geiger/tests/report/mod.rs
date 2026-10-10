@@ -35,14 +35,18 @@ pub fn merge_test_reports(report: &mut SafetyReport, other: SafetyReport) {
 }
 
 pub fn to_quick_report(report: SafetyReport) -> QuickSafetyReport {
-    let entries = report
+    let entries: std::collections::HashMap<
+        cargo_geiger_serde::PackageId,
+        cargo_geiger_serde::QuickReportEntry,
+    > = report
         .packages
         .into_iter()
         .map(|(id, entry)| {
-            let quick_entry = QuickReportEntry {
-                package: entry.package,
-                forbids_unsafe: entry.unsafety.forbids_unsafe,
-            };
+            let quick_entry: cargo_geiger_serde::QuickReportEntry =
+                QuickReportEntry {
+                    package: entry.package,
+                    forbids_unsafe: entry.unsafety.forbids_unsafe,
+                };
             (id, quick_entry)
         })
         .collect();

@@ -25,7 +25,7 @@ pub fn ref_slice_package_id() -> PackageId {
 }
 
 pub fn ref_slice_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(ref_slice_package_id()),
         unsafety: UnsafeInfo {
             used: CounterBlock {
@@ -54,7 +54,7 @@ pub fn either_package_id() -> PackageId {
 }
 
 pub fn either_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(either_package_id()),
         unsafety: UnsafeInfo {
             used: CounterBlock {
@@ -91,7 +91,7 @@ pub fn doc_comment_package_id() -> PackageId {
 }
 
 pub fn doc_comment_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(doc_comment_package_id()),
         unsafety: UnsafeInfo {
             used: CounterBlock {
@@ -124,7 +124,7 @@ pub fn itertools_package_id() -> PackageId {
 }
 
 pub fn itertools_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![either_package_id()]),
             ..PackageInfo::new(itertools_package_id())
@@ -177,7 +177,8 @@ pub fn itertools_safety_report() -> SafetyReport {
             ..Default::default()
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, either_safety_report());
     report
 }
@@ -191,7 +192,7 @@ pub fn cfg_if_package_id() -> PackageId {
 }
 
 pub fn cfg_if_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(cfg_if_package_id()),
         unsafety: Default::default(),
     };
@@ -207,7 +208,7 @@ pub fn generational_arena_package_id() -> PackageId {
 }
 
 pub fn generational_arena_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![cfg_if_package_id()]),
             ..PackageInfo::new(generational_arena_package_id())
@@ -250,7 +251,8 @@ pub fn generational_arena_safety_report() -> SafetyReport {
             forbids_unsafe: true,
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, cfg_if_safety_report());
     report
 }
@@ -264,7 +266,7 @@ pub fn idna_package_id() -> PackageId {
 }
 
 pub fn idna_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![
                 matches_package_id(),
@@ -299,7 +301,8 @@ pub fn idna_safety_report() -> SafetyReport {
             ..Default::default()
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, matches_safety_report());
     merge_test_reports(&mut report, unicode_bidi_safety_report());
     merge_test_reports(&mut report, unicode_normalization_safety_report());
@@ -315,7 +318,7 @@ pub fn matches_package_id() -> PackageId {
 }
 
 pub fn matches_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(matches_package_id()),
         unsafety: Default::default(),
     };
@@ -331,7 +334,7 @@ pub fn smallvec_package_id() -> PackageId {
 }
 
 pub fn smallvec_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo::new(smallvec_package_id()),
         unsafety: UnsafeInfo {
             used: CounterBlock {
@@ -393,7 +396,7 @@ pub fn unicode_bidi_package_id() -> PackageId {
 }
 
 pub fn unicode_bidi_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![matches_package_id()]),
             ..PackageInfo::new(unicode_bidi_package_id())
@@ -422,7 +425,8 @@ pub fn unicode_bidi_safety_report() -> SafetyReport {
             ..Default::default()
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, matches_safety_report());
     report
 }
@@ -436,7 +440,7 @@ pub(super) fn unicode_normalization_package_id() -> PackageId {
 }
 
 pub(super) fn unicode_normalization_safety_report() -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![smallvec_package_id()]),
             ..PackageInfo::new(unicode_normalization_package_id())
@@ -478,7 +482,8 @@ pub(super) fn unicode_normalization_safety_report() -> SafetyReport {
             ..Default::default()
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, smallvec_safety_report());
     report
 }
@@ -492,7 +497,7 @@ pub fn num_cpus_package_id(cx: &Context) -> PackageId {
 }
 
 pub fn num_cpus_safety_report(cx: &Context) -> SafetyReport {
-    let entry = ReportEntry {
+    let entry: cargo_geiger_serde::ReportEntry = ReportEntry {
         package: PackageInfo {
             dependencies: to_set(vec![make_package_id(cx, super::Test1::NAME)]),
             ..PackageInfo::new(num_cpus_package_id(cx))
@@ -508,7 +513,8 @@ pub fn num_cpus_safety_report(cx: &Context) -> SafetyReport {
             ..Default::default()
         },
     };
-    let mut report = single_entry_safety_report(entry);
+    let mut report: cargo_geiger_serde::SafetyReport =
+        single_entry_safety_report(entry);
     merge_test_reports(&mut report, super::Test1.expected_report(cx));
     report
 }
