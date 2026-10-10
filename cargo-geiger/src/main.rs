@@ -30,19 +30,22 @@ fn cli_result_main(args: &Args) -> CliResult {
         return Ok(());
     }
 
-    let mut gctx = GlobalContext::default()?;
+    let mut gctx: cargo::GlobalContext = GlobalContext::default()?;
     args.update_config(&mut gctx)?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let cargo_metadata = get_cargo_metadata(args, &gctx)?;
-    let krates = get_krates(&cargo_metadata)?;
+    let krates: krates::Krates = get_krates(&cargo_metadata)?;
 
-    let cargo_metadata_parameters = CargoMetadataParameters {
+    let cargo_metadata_parameters: cargo_geiger::mapping::CargoMetadataParameters<'_> = CargoMetadataParameters {
         metadata: &cargo_metadata,
         krates: &krates,
     };
 
-    let workspace = get_workspace(&gctx, args.manifest_path.clone())?;
+    let workspace: cargo::core::Workspace<'_> =
+        get_workspace(&gctx, args.manifest_path.clone())?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let cargo_metadata_root_package_id = if let Some(
         cargo_metadata_root_package,
     ) = cargo_metadata.root_package()
@@ -60,9 +63,10 @@ fn cli_result_main(args: &Args) -> CliResult {
         return Err(CliError::code(1));
     };
 
-    let global_rustc = gctx.load_global_rustc(Some(&workspace))?;
+    let global_rustc: cargo::util::Rustc =
+        gctx.load_global_rustc(Some(&workspace))?;
 
-    let graph = build_graph(
+    let graph: cargo_geiger::graph::Graph = build_graph(
         args,
         &cargo_metadata_parameters,
         &global_rustc.host,
@@ -70,6 +74,7 @@ fn cli_result_main(args: &Args) -> CliResult {
         cargo_metadata_root_package_id.clone(),
     )?;
 
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let query_resolve_root_package_id = args.package.as_ref().map_or(
         cargo_metadata_root_package_id.clone(),
         |package_query| {
@@ -82,7 +87,7 @@ fn cli_result_main(args: &Args) -> CliResult {
     let ScanResult {
         scan_output_lines,
         warning_count,
-    } = scan(
+    }: cargo_geiger::scan::ScanResult = scan(
         args,
         &cargo_metadata_parameters,
         &gctx,
@@ -113,9 +118,10 @@ fn cli_result_main(args: &Args) -> CliResult {
 }
 
 fn main() {
-    let args = Args::parse_args(pico_args::Arguments::from_env()).unwrap();
+    let args: cargo_geiger::args::Args =
+        Args::parse_args(pico_args::Arguments::from_env()).unwrap();
     if let Err(e) = cli_result_main(&args) {
-        let mut shell = Shell::new();
+        let mut shell: cargo::core::Shell = Shell::new();
         cargo::exit_with_error(e, &mut shell)
     }
 }

@@ -8,8 +8,9 @@ where
     I: IntoIterator,
     I::Item: AsRef<std::ffi::OsStr>,
 {
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let cx = Context::new();
-    let output = Command::cargo_bin("cargo-geiger")
+    let output: std::process::Output = Command::cargo_bin("cargo-geiger")
         .unwrap()
         .arg("geiger")
         .arg("--color=never")

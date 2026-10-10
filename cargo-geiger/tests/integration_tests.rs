@@ -23,28 +23,28 @@ use std::process::Output;
 fn test_package(name: &str) {
     better_panic::install();
 
-    let result = run_geiger(name);
+    let result: std::process::Output = run_geiger(name);
 
-    let stderr_filename = format!("{}.stderr", name);
-    let stderr = String::from_utf8(result.stderr)
+    let stderr_filename: std::string::String = format!("{}.stderr", name);
+    let stderr: std::string::String = String::from_utf8(result.stderr)
         .expect("output should have been valid utf-8");
 
     if !stderr.is_empty() {
-        let manifest_path_regex = regex::Regex::new(r"`([^`]+).toml`").unwrap();
-        let artifact_json_blob_regex = regex::Regex::new(
+        let manifest_path_regex: regex::Regex = regex::Regex::new(r"`([^`]+).toml`").unwrap();
+        let artifact_json_blob_regex: regex::Regex = regex::Regex::new(
             r#"\{"\$message_type":"artifact","artifact":.*"emit":.*\}"#,
         )
         .unwrap();
 
-        let stderr = manifest_path_regex.replace(&stderr, "`{MANIFEST_PATH}`");
-        let stderr = artifact_json_blob_regex
+        let stderr: std::borrow::Cow<'_, str> = manifest_path_regex.replace(&stderr, "`{MANIFEST_PATH}`");
+        let stderr: std::borrow::Cow<'_, str> = artifact_json_blob_regex
             .replace_all(&stderr, "`{ARTIFACT_JSON_BLOB}`");
 
         assert_snapshot!(stderr_filename, stderr);
     }
 
-    let stdout_filename = format!("{}.stdout", name);
-    let stdout = String::from_utf8(result.stdout)
+    let stdout_filename: std::string::String = format!("{}.stdout", name);
+    let stdout: std::string::String = String::from_utf8(result.stdout)
         .expect("output should have been valid utf-8");
     assert_snapshot!(stdout_filename, stdout);
 
