@@ -55,6 +55,7 @@ where
     F: FnMut(usize, usize) -> CargoResult<()>,
 {
     let mut res: Option<GeigerContext> = None;
+    #[allow(clippy::type_complexity)]
     let (progress_sender, progress_receiver): (
         std::sync::mpsc::SyncSender<(usize, usize)>,
         std::sync::mpsc::Receiver<(usize, usize)>,
