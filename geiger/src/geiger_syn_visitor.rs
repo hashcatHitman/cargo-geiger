@@ -53,7 +53,7 @@ impl<'ast> visit::Visit<'ast> for GeigerSynVisitor {
         if IncludeTests::No == self.include_tests && is_test_fn(item_fn) {
             return;
         }
-        let unsafe_fn =
+        let unsafe_fn: bool =
             item_fn.sig.unsafety.is_some() || has_unsafe_attributes(item_fn);
         if unsafe_fn {
             self.enter_unsafe_scope()

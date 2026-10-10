@@ -53,20 +53,21 @@ impl fmt::Display for ScanFileError {
 fn file_forbids_unsafe(f: &syn::File) -> bool {
     f.attrs.iter().any(|attr| {
         // https://docs.rs/syn/latest/syn/meta/struct.ParseNestedMeta.html#example
-        let mut is_forbid_unsafe_code = false;
+        let mut is_forbid_unsafe_code: bool = false;
         // Parses `#!`.
         if matches!(attr.style, AttrStyle::Inner(_)) {
             // Parses `forbid`.
             if attr.path().is_ident("forbid") {
                 // Parses `(`.
-                let _ = attr.parse_nested_meta(|meta| {
-                    if meta.path.is_ident("unsafe_code")
-                        && meta.value().is_err()
-                    {
-                        is_forbid_unsafe_code = true;
-                    }
-                    Ok(())
-                });
+                let _: std::result::Result<(), syn::Error> = attr
+                    .parse_nested_meta(|meta| {
+                        if meta.path.is_ident("unsafe_code")
+                            && meta.value().is_err()
+                        {
+                            is_forbid_unsafe_code = true;
+                        }
+                        Ok(())
+                    });
             }
         }
         is_forbid_unsafe_code
@@ -101,15 +102,16 @@ fn has_unsafe_attributes(item_fn: &ItemFn) -> bool {
 /// TODO: Investigate if the needed information can be emitted by rustc today.
 fn is_test_mod(item: &ItemMod) -> bool {
     item.attrs.iter().any(|attr| {
-        let mut found_cfg_test = false;
+        let mut found_cfg_test: bool = false;
         if attr.path().is_ident("cfg") {
-            let _ = attr.parse_nested_meta(|meta| {
-                // Parse `(`.
-                if meta.path.is_ident("test") {
-                    found_cfg_test = true;
-                }
-                Ok(())
-            });
+            let _: std::result::Result<(), syn::Error> = attr
+                .parse_nested_meta(|meta| {
+                    // Parse `(`.
+                    if meta.path.is_ident("test") {
+                        found_cfg_test = true;
+                    }
+                    Ok(())
+                });
         }
         found_cfg_test
     })

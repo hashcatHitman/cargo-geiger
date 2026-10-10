@@ -249,9 +249,10 @@ mod entry_serde {
         T: Serialize + super::Entry,
         S: Serializer,
     {
-        let mut values = map.values().collect::<Vec<_>>();
+        let mut values: std::vec::Vec<&T> = map.values().collect::<Vec<_>>();
         values.sort_by(|a, b| a.package_id().cmp(b.package_id()));
-        let mut seq = serializer.serialize_seq(Some(values.len()))?;
+        let mut seq: <S as serde::Serializer>::SerializeSeq =
+            serializer.serialize_seq(Some(values.len()))?;
         for value in values {
             seq.serialize_element(value)?;
         }
@@ -281,6 +282,7 @@ mod entry_serde {
             where
                 A: serde::de::SeqAccess<'d>,
             {
+                #[expect(clippy::undeclared_type, reason = "Borked!")]
                 let mut map = HashMap::new();
                 while let Some(item) = seq.next_element::<U>()? {
                     map.insert(item.package_id().clone(), item);
@@ -305,9 +307,10 @@ mod set_serde {
         T: Serialize + Ord,
         S: Serializer,
     {
-        let mut values = set.iter().collect::<Vec<_>>();
+        let mut values: std::vec::Vec<&T> = set.iter().collect::<Vec<_>>();
         values.sort();
-        let mut seq = serializer.serialize_seq(Some(values.len()))?;
+        let mut seq: <S as serde::Serializer>::SerializeSeq =
+            serializer.serialize_seq(Some(values.len()))?;
         for value in values {
             seq.serialize_element(value)?;
         }

@@ -11,12 +11,12 @@ pub fn find_unsafe_in_file(
     path: &Path,
     include_tests: IncludeTests,
 ) -> Result<RsFileMetrics, ScanFileError> {
-    let mut file = File::open(path)
+    let mut file: std::fs::File = File::open(path)
         .map_err(|e| ScanFileError::Io(e, path.to_path_buf()))?;
-    let mut src = vec![];
+    let mut src: std::vec::Vec<u8> = vec![];
     file.read_to_end(&mut src)
         .map_err(|e| ScanFileError::Io(e, path.to_path_buf()))?;
-    let src = String::from_utf8(src)
+    let src: std::string::String = String::from_utf8(src)
         .map_err(|e| ScanFileError::Utf8(e, path.to_path_buf()))?;
     find_unsafe_in_string(&src, include_tests)
         .map_err(|e| ScanFileError::Syn(e, path.to_path_buf()))
@@ -27,7 +27,8 @@ pub fn find_unsafe_in_string(
     include_tests: IncludeTests,
 ) -> Result<RsFileMetrics, syn::Error> {
     use syn::visit::Visit;
-    let syntax = syn::parse_file(src)?;
+    let syntax: syn::File = syn::parse_file(src)?;
+    #[expect(clippy::undeclared_type, reason = "Borked!")]
     let mut vis = GeigerSynVisitor::new(include_tests);
     vis.visit_file(&syntax);
     Ok(vis.metrics)
