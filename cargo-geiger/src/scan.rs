@@ -176,19 +176,17 @@ fn list_files_used_but_not_scanned(
 ) -> Vec<PathBuf> {
     let scanned_files = geiger_context
         .package_id_to_metrics
-        .iter()
-        .flat_map(|(_, package_metrics)| {
-            package_metrics.rs_path_to_metrics.keys()
-        })
+        .values()
+        .flat_map(|package_metrics| package_metrics.rs_path_to_metrics.keys())
         .collect::<HashSet<&PathBuf>>();
 
     rs_files_used
         .iter()
-        .cloned()
-        .filter(|p| {
+        .filter(|&p| {
             !scanned_files.contains(p)
                 && !geiger_context.ignored_paths.contains(p)
         })
+        .cloned()
         .collect()
 }
 
@@ -357,7 +355,7 @@ mod scan_tests {
             &mut visited,
         );
 
-        assert_eq!(visited, vec![dependency_index].iter().cloned().collect());
+        assert_eq!(visited, [dependency_index].iter().cloned().collect());
         assert_eq!(
             package_info.dependencies.len(),
             expected_package_info_dependency_length
@@ -446,7 +444,7 @@ mod scan_tests {
             input_rs_path_to_metrics_vec.iter().cloned().collect();
 
         let geiger_context = GeigerContext {
-            package_id_to_metrics: vec![(
+            package_id_to_metrics: [(
                 package_id,
                 PackageMetrics { rs_path_to_metrics },
             )]
@@ -489,7 +487,7 @@ mod scan_tests {
                 .set_is_crate_entry_point(true)
                 .build(),
         )]);
-        let stats = unsafe_stats(&metrics, &set_of_paths(&["foo.rs"]));
+        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs"]));
         assert!(stats.forbids_unsafe)
     }
 
@@ -512,8 +510,7 @@ mod scan_tests {
                     .build(),
             ),
         ]);
-        let stats =
-            unsafe_stats(&metrics, &set_of_paths(&["foo.rs", "bar.rs"]));
+        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
         assert!(!stats.forbids_unsafe)
     }
 
@@ -531,8 +528,7 @@ mod scan_tests {
                 MetricsBuilder::default().functions(200, 100).build(),
             ),
         ]);
-        let stats =
-            unsafe_stats(&metrics, &set_of_paths(&["foo.rs", "bar.rs"]));
+        let stats = unsafe_stats(&metrics, &set_of_paths(["foo.rs", "bar.rs"]));
         assert_eq!(stats.used.functions.safe, 7);
         assert_eq!(stats.used.functions.unsafe_, 4);
         assert_eq!(stats.unused.functions.safe, 220);

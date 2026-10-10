@@ -75,7 +75,7 @@ fn cli_result_main(args: &Args) -> CliResult {
         |package_query| {
             krates
                 .query_resolve(package_query)
-                .map_or(cargo_metadata_root_package_id, |package_id| package_id)
+                .unwrap_or(cargo_metadata_root_package_id)
         },
     );
 

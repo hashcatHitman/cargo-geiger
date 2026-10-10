@@ -31,7 +31,7 @@ impl QueryResolve for Krates {
         match PkgSpec::from_str(query) {
             Ok(package_spec) => self
                 .krates_by_name(package_spec.name.as_str())
-                .filter(|m| package_spec.matches(&m.krate))
+                .filter(|m| package_spec.matches(m.krate))
                 .map(|m| m.krate.clone().id)
                 .collect::<Vec<CargoMetadataPackageId>>()
                 .pop(),

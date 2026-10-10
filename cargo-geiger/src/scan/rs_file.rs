@@ -117,9 +117,9 @@ pub fn into_rs_code_file(target_kind: &TargetKind, path: PathBuf) -> RsFile {
 /// <https://github.com/oli-obk/cargo_metadata/blob/540fc6cd8ea1624055c98faf92ef61f620b6aa8f/src/lib.rs#L400>
 /// can be used to improve this function.
 pub fn into_target_kind(
-    raw_target_kind: &Vec<krates::cm::TargetKind>,
+    raw_target_kind: &[krates::cm::TargetKind],
 ) -> TargetKind {
-    match &raw_target_kind[..] {
+    match raw_target_kind {
         [krates::cm::TargetKind::Bench] => TargetKind::Bench,
         [krates::cm::TargetKind::Bin] => TargetKind::Bin,
         [krates::cm::TargetKind::CustomBuild] => TargetKind::CustomBuild,
@@ -417,7 +417,7 @@ mod rs_file_tests {
         let gctx = GlobalContext::default().unwrap();
         let cwd = gctx.cwd();
 
-        let walk_dir_rust_files = WalkDir::new(&cwd)
+        let walk_dir_rust_files = WalkDir::new(cwd)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.path().to_str().unwrap().ends_with(".rs"));
@@ -426,7 +426,7 @@ mod rs_file_tests {
             assert!(is_file_with_ext(&entry, "rs"));
         }
 
-        let walk_dir_readme_files = WalkDir::new(&cwd)
+        let walk_dir_readme_files = WalkDir::new(cwd)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.path().to_str().unwrap().contains("README"));

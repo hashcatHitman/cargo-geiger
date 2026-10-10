@@ -242,17 +242,12 @@ pub struct ReadmeArgs {
     pub update_readme: bool,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Default)]
 pub enum Verbosity {
+    #[default]
     Verbose,
     Normal,
     Quiet,
-}
-
-impl Default for Verbosity {
-    fn default() -> Self {
-        Verbose
-    }
 }
 
 fn parse_features(raw_features: Option<String>) -> Vec<String> {

@@ -60,10 +60,10 @@ fn file_forbids_unsafe(f: &syn::File) -> bool {
             if attr.path().is_ident("forbid") {
                 // Parses `(`.
                 let _ = attr.parse_nested_meta(|meta| {
-                    if meta.path.is_ident("unsafe_code") {
-                        if meta.value().is_err() {
-                            is_forbid_unsafe_code = true;
-                        }
+                    if meta.path.is_ident("unsafe_code")
+                        && meta.value().is_err()
+                    {
+                        is_forbid_unsafe_code = true;
                     }
                     Ok(())
                 });
