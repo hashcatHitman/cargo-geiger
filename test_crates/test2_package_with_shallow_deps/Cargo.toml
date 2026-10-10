@@ -7,3 +7,5 @@ edition = "2018"
 ref_slice = "1.1.1"
 test1_package_with_no_deps = { path = "../test1_package_with_no_deps" }
 
+[lints]
+workspace = true

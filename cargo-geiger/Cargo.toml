@@ -1,6 +1,11 @@
 [package]
 authors = ["anderejd <rajder@gmail.com>"]
-categories = ["command-line-utilities", "development-tools", "development-tools::cargo-plugins", "parsing"]
+categories = [
+    "command-line-utilities",
+    "development-tools",
+    "development-tools::cargo-plugins",
+    "parsing",
+]
 description = "Detects usage of unsafe Rust in a Rust crate and its dependencies."
 edition = "2018"
 keywords = ["unsafe", "cargo", "plugin"]
@@ -48,3 +53,6 @@ regex = "1.7.3"
 rstest = "0.18.2"
 semver = "1.0.17"
 tempfile = "3.4.0"
+
+[lints]
+workspace = true

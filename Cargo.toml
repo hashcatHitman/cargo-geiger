@@ -8,8 +8,7 @@ exclude = [
     "test_crates/test6_cargo_lock_out_of_date",
     "test_crates/test7_package_with_patched_dep",
 ]
-members = [
-    "cargo-geiger",
-    "cargo-geiger-serde",
-    "geiger",
-]
+members = ["cargo-geiger", "cargo-geiger-serde", "geiger"]
+
+[workspace.lints.clippy]
+undeclared_type = "warn"

@@ -5,3 +5,6 @@ edition = "2018"
 
 [dependencies]
 [workspace]
+
+[workspace.lints.clippy]
+undeclared_type = "warn"

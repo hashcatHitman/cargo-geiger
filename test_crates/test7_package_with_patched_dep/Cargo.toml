@@ -8,3 +8,5 @@ num_cpus = { git = "https://github.com/seanmonstar/num_cpus" }
 
 [patch."https://github.com/seanmonstar/num_cpus"]
 num_cpus = { path = "../support/num_cpus" }
+[lints]
+workspace = true

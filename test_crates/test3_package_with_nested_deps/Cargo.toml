@@ -7,3 +7,5 @@ edition = "2018"
 doc-comment = "0.3.1"
 itertools = { git = "https://github.com/rust-itertools/itertools.git", rev = "98d3978" }
 test2_package_with_shallow_deps = { path = "../test2_package_with_shallow_deps" }
+[lints]
+workspace = true
